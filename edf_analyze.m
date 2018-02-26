@@ -28,6 +28,7 @@ emg_ch3_filtered_rectified = emgCleanup(emg_ch3);
 % Samples are chosen interval_duration  before and after time stamp 
 annotations = readtable('/Users/ayesha/Documents/Ayesha_phd_local storage/EMG data analysis/18UN_19-2-18/annotations1_US.csv');
 time_stamp 	= annotations.x___time_stamp;
+number_intervals = length(time_stamp);
 interval_duration   = 0.5; % refers to 0.5 seconds(500ms) before and after time stamp
 
 emg_ch1_filtered_rectified_samples = emgSelect(emg_ch1_filtered_rectified, time_stamp, interval_duration, sampling_frequency);
