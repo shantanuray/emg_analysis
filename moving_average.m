@@ -1,5 +1,5 @@
-function emg_moving_average = moving_average(emg_signal, window_duration, sampling_frequency)
-% emg_moving_average = moving_average(emg_signal, window_duration, sampling_frequency);
+function emg_moving_average = movingAverage(emg_signal, window_duration, sampling_frequency)
+% emg_moving_average = movingAverage(emg_signal, window_duration, sampling_frequency);
 % A moving-average filter is a common method used for smoothing noisy data. This example uses the filter function to compute averages along a vector of data.
 % Create a 1-by-100 row vector of sinusoidal data that is corrupted by random noise.
 % t = linspace(-pi,pi,100);

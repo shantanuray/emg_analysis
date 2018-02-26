@@ -1,5 +1,5 @@
-function emg_samples = emg_select(emg_clean, time_stamp, interval_duration, sampling_frequency)
-% emg_samples = emg_select(emg_clean, time_stamp, interval_duration, sampling_frequency);
+function emg_samples = emgSelect(emg_clean, time_stamp, interval_duration, sampling_frequency)
+% emg_samples = emgSelect(emg_clean, time_stamp, interval_duration, sampling_frequency);
 sample_number = round((time_stamp) * (sampling_frequency), 0);
 % computes the sample number in the emg channel data which corresponds to the time stamp from the annotations data file
 

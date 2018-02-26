@@ -7,6 +7,6 @@ These are programs written to read, process and analyze EMG recordings
 * EDF Read library from Mathworks
   * edfread
 * EDF Processing:
-  * emg_signal_cleanup: Low pass filter and rectification
-  * emg_select: Select samples around annotations
-  * moving average: Find the moving average
+  * emgCleanup: Low pass filter and rectification
+  * emgSelect: Select samples around annotations
+  * movingAverage: Find the moving average

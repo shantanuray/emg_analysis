@@ -1,5 +1,5 @@
-function emg_clean = emg_signal_cleanup(emg_signal)
-% emg_clean = emg_signal_cleanup(emg_signal);
+function emg_clean = emgCleanup(emg_signal)
+% emg_clean = emgCleanup(emg_signal);
 load('/Users/ayesha/Projects/Electrophysiology/EMG/bandpass_filter_butterworth_10-350Hz.mat');
 
 emg_ch1_filtered = filter(d, emg_signal);
