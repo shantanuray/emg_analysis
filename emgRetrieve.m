@@ -21,7 +21,4 @@ function emgData = emgRetrieve(emgFile, timestampStartStop,paddingDuration,windo
     % Samples are chosen paddingDuration  before and after time stamp 
 
     emgData(i,:) = emgSelect(record(i,:), timestampStartStop, paddingDuration, samplingFrequency);
-
-    %computes the moving average for a window of 25 ms or 0.025s, useful to find gradual trends in data
-    emgData(i,:) = movingAverage(emgData(i,:), windowDuration, samplingFrequency);
   end;
