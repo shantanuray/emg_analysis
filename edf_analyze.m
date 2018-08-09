@@ -35,6 +35,36 @@ emg_ch1_filtered_rectified_samples = emgSelect(emg_ch1_filtered_rectified, time_
 emg_ch2_filtered_rectified_samples = emgSelect(emg_ch2_filtered_rectified, time_stamp, interval_duration, sampling_frequency);
 emg_ch3_filtered_rectified_samples = emgSelect(emg_ch3_filtered_rectified, time_stamp, interval_duration, sampling_frequency);
 
+%computes baseline for each row
+baseline_start = 0;
+baseline_end = 0.2;
+
+emg_ch1_filtered_rectified_samples_baseline = emg_ch1_filtered_rectified_samples(:, baseline_start*sampling_frequency+1:baseline_end*sampling_frequency);
+emg_ch2_filtered_rectified_samples_baseline = emg_ch2_filtered_rectified_samples(:, baseline_start*sampling_frequency+1:baseline_end*sampling_frequency);
+emg_ch3_filtered_rectified_samples_baseline = emg_ch3_filtered_rectified_samples(:, baseline_start*sampling_frequency+1:baseline_end*sampling_frequency);
+
+emg_ch1_Average_baseline = mean(emg_ch1_filtered_rectified_samples_baseline,2);
+emg_ch2_Average_baseline = mean(emg_ch2_filtered_rectified_samples_baseline,2);
+emg_ch3_Average_baseline = mean(emg_ch3_filtered_rectified_samples_baseline,2);
+
+%computes mvolt activity within the reach
+Emg_activity_start = 0.21;
+Emg_activity_end = 0.8;
+
+emg_ch1_filtered_rectified_samples_activity = emg_ch1_filtered_rectified_samples(:, Emg_activity_start*sampling_frequency+1:Emg_activity_end*sampling_frequency);
+emg_ch2_filtered_rectified_samples_activity = emg_ch2_filtered_rectified_samples(:, Emg_activity_start*sampling_frequency+1:Emg_activity_end*sampling_frequency);
+emg_ch3_filtered_rectified_samples_activity = emg_ch3_filtered_rectified_samples(:, Emg_activity_start*sampling_frequency+1:Emg_activity_end*sampling_frequency);
+ 
+emg_ch1_activity = mean(emg_ch1_filtered_rectified_samples_activity,2);
+emg_ch2_activity = mean(emg_ch2_filtered_rectified_samples_activity,2);
+emg_ch3_activity = mean(emg_ch3_filtered_rectified_samples_activity,2);
+ 
+
+%computes %fold change
+emg_ch1_foldchange = ((emg_ch1_activity-emg_ch1_Average_baseline)/emg_ch1_Average_baseline)*100;
+emg_ch2_foldchange = ((emg_ch2_activity-emg_ch2_Average_baseline)/emg_ch2_Average_baseline)*100;
+emg_ch3_foldchange = ((emg_ch3_activity-emg_ch3_Average_baseline)/emg_ch3_Average_baseline)*100;
+
 %computes the average voltage at each time point in reference to the annotation data point
 emg_ch1_filtered_rectified_avg = sum(emg_ch1_filtered_rectified_samples, 1)./number_intervals;
 emg_ch2_filtered_rectified_avg = sum(emg_ch2_filtered_rectified_samples, 1)./number_intervals;
@@ -46,4 +76,38 @@ emg_ch1_filtered_rectified_moving_avg = movingAverage(emg_ch1_filtered_rectified
 emg_ch2_filtered_rectified_moving_avg = movingAverage(emg_ch2_filtered_rectified_avg, window_duration, sampling_frequency);
 emg_ch3_filtered_rectified_moving_avg = movingAverage(emg_ch3_filtered_rectified_avg, window_duration, sampling_frequency);
 
+%computes area under curve for each sample
+emg_ch1_filtered_rectified_Area_under_curve=trapz((0:length(emg_ch1_filtered_rectified_samples)-1)/sampling_frequency,emg_ch1_filtered_rectified_samples, 2);
+emg_ch2_filtered_rectified_Area_under_curve=trapz((0:length(emg_ch2_filtered_rectified_samples)-1)/sampling_frequency,emg_ch2_filtered_rectified_samples, 2);
+emg_ch3_filtered_rectified_Area_under_curve=trapz((0:length(emg_ch3_filtered_rectified_samples)-1)/sampling_frequency,emg_ch3_filtered_rectified_samples, 2);
 
+% computes average AUC
+emg_ch1_averag_Area_under_curve = mean(emg_ch1_filtered_rectified_Area_under_curve);
+emg_ch2_averag_Area_under_curve = mean(emg_ch2_filtered_rectified_Area_under_curve);
+emg_ch3_averag_Area_under_curve = mean(emg_ch3_filtered_rectified_Area_under_curve);
+
+
+figure
+subplot(3,1,1)
+plot((0:length(emg_ch1_filtered_rectified_avg)-1)/sampling_frequency, ...
+    emg_ch1_filtered_rectified_avg)
+hold on
+plot((0:length(emg_ch1_filtered_rectified_avg)-1)/sampling_frequency, ...
+    emg_ch1_filtered_rectified_moving_avg, 'r')
+hold off
+
+subplot(3,1,2)
+plot((0:length(emg_ch1_filtered_rectified_avg)-1)/sampling_frequency, ...
+    emg_ch2_filtered_rectified_avg)
+hold on
+plot((0:length(emg_ch1_filtered_rectified_avg)-1)/sampling_frequency, ...
+    emg_ch2_filtered_rectified_moving_avg, 'r')
+hold off
+
+subplot(3,1,3)
+plot((0:length(emg_ch1_filtered_rectified_avg)-1)/sampling_frequency, ...
+    emg_ch3_filtered_rectified_avg)
+hold on
+plot((0:length(emg_ch1_filtered_rectified_avg)-1)/sampling_frequency, ...
+    emg_ch3_filtered_rectified_moving_avg, 'r')
+hold off
