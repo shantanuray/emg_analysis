@@ -1,8 +1,8 @@
 function emg_clean = emgCleanup(emg_signal)
 % emg_clean = emgCleanup(emg_signal);
-load('bandpass_filter_butterworth_10-350Hz.mat');
+% load('bandpass_filter_butterworth_10-350Hz.mat');
 
-emg_ch1_filtered = filter(d, emg_signal);
+% emg_ch1_filtered = filter(d, emg_signal);
 % Applies a digital filter, defined using the matlab filter app, bandpass 10-500hz, butterworth.
 % y1=fft(emg_recording_ch1_filtered);
 % m1=abs(y1);
