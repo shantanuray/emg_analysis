@@ -15,8 +15,9 @@ for i = 1:length(annotations.Reach)
   % Pick out the samples that correspond to the consistent time-window calculated above
   yRange = [1 numbersamples]+((timestampEMG.Window-timestampEMG.StartStopNormalized(i,:))*emgSamplingFrequency);
   yPlot = emgData{i}(:,int16(yRange(1):yRange(2)));
-  yPlot = yPlot(:,1:length(xPlot)); % Hack: Just to make x and y dim the same
+  yPlot = yPlot(:,1:min(size(yPlot,2),length(xPlot))); % Hack: Just to make x and y dim the same
   % Concatenate each row - we are adding data in 3-D to accommodate the channels
   % i.e. [time-window x channel x reach]
+  xPlot = xPlot(1:min(size(yPlot,2),length(xPlot)));
   emgDataPlot = cat(3, emgDataPlot, yPlot');
 end

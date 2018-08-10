@@ -5,13 +5,13 @@ function emgAnalyzed = emgDataAnalysis(emgRawData,samplingFrequency,baselineEnd,
   baselineEndSamples = baselineEnd*samplingFrequency;
 
   emgAnalyzed.Baseline = emgRawData(int16(baselineStartSamples:baselineEndSamples),:,:);
-  emgAnalyzed.Baseline = reshape(mean(emgAnalyzed.Baseline,1),size(emgAnalyzed.Baseline,2),size(emgAnalyzed.Baseline,3));
+  emgAnalyzed.Baseline = mean(emgAnalyzed.Baseline,1);
 
   % Compute mVolt activity within the reach
   activityStart = baselineEndSamples+1;
 
   emgAnalyzed.Active = emgRawData(int16(activityStart:end),:,:);
-  emgAnalyzed.Active = reshape(mean(emgAnalyzed.Active,1),size(emgAnalyzed.Active,2),size(emgAnalyzed.Active,3));
+  emgAnalyzed.Active = mean(emgAnalyzed.Active,1);
 
   % Compute %fold change
   emgAnalyzed.FoldChange = ((emgAnalyzed.Active-emgAnalyzed.Baseline)./emgAnalyzed.Baseline)*100;
@@ -23,4 +23,4 @@ function emgAnalyzed = emgDataAnalysis(emgRawData,samplingFrequency,baselineEnd,
   emgAnalyzed.MovingAverage = movingAverage(emgAnalyzed.Average,movingAverageWindow,samplingFrequency,1);
 
   % Computes area under curve for each annotation
-  emgAnalyzed.AreaUnderCurve=reshape(trapz((0:size(emgRawData,1)-1)/samplingFrequency,emgRawData, 1),size(emgRawData,2),size(emgRawData,3));
+  emgAnalyzed.AreaUnderCurve=trapz((0:size(emgRawData,1)-1)/samplingFrequency,emgRawData, 1);
