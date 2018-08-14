@@ -8,17 +8,20 @@ function emgAnalyzed = emgDataAnalysis(emgRawData,emgBaseline,emgSamplingFrequen
   removewindow = round(removewindow*emgSamplingFrequency);
 
   emgAnalyzed.RawData = emgRawData(:,:,removewindow+1:size(emgRawData,3)-removewindow);
-  % Compute baseline for each row from 0th to 0.2 of the time window
-  emgAnalyzed.Baseline = mean(emgBaseline,2);
 
   % Compute mVolt activity within the reach
   activityStart = round(activityStart*emgSamplingFrequency)+1;
+  % Compute baseline for each row from 0th to 0.2 of the time window
+  emgAnalyzed.Baseline = mean(emgBaseline,2);
+  emgAnalyzed.Baseline1 = emgAnalyzed.RawData(:,:,1:activityStart-1);
+  emgAnalyzed.Baseline1 = mean(emgAnalyzed.Baseline1,3);
 
   emgAnalyzed.Active = emgAnalyzed.RawData(:,:,int16(activityStart:end));
   emgAnalyzed.Active = mean(emgAnalyzed.Active,3);
 
   % Compute %fold change
   emgAnalyzed.FoldChangeMean = (emgAnalyzed.Active./emgAnalyzed.Baseline);
+  emgAnalyzed.FoldChangeMean1 = (emgAnalyzed.Active./emgAnalyzed.Baseline1);
 
   % Compute the moving average of the raw data
   emgAnalyzed.RawAverage = movingAverage(emgAnalyzed.RawData,movingAverageWindow,emgSamplingFrequency,3);
@@ -31,6 +34,7 @@ function emgAnalyzed = emgDataAnalysis(emgRawData,emgBaseline,emgSamplingFrequen
       initpos = reachpos+round((timestampEMG.Initialize(j)-timestampEMG.Reach(j))*emgSamplingFrequency);
       emgAnalyzed.ReachTimestamp(i,j) = reachpos/emgSamplingFrequency;
       emgAnalyzed.InitializeTimestamp(i,j) = initpos/emgSamplingFrequency;
+      emgAnalyzed.TimeToPeakms(i,j) = (reachpos-initpos)*1000/emgSamplingFrequency;
       emgAnalyzed.PeakValueRawAverage(i,j) = max(emgAnalyzed.RawAverage(i,j,initpos:end),[],3);
       closestpeak = find(emgAnalyzed.RawAverage(i,j,initpos:end)==emgAnalyzed.PeakValueRawAverage(i,j),1);
       emgAnalyzed.ClosestPeakPosition(i,j) = closestpeak+initpos;
@@ -42,6 +46,8 @@ function emgAnalyzed = emgDataAnalysis(emgRawData,emgBaseline,emgSamplingFrequen
   % Computes area under curve for each annotation using normalized raw data
   emgAnalyzed.AreaUnderCurveNormalized=trapz((0:size(emgAnalyzed.RawData,3)-1)/emgSamplingFrequency,...
     (emgAnalyzed.RawData./emgAnalyzed.Baseline),3);
+  emgAnalyzed.AreaUnderCurveNormalized1=trapz((0:size(emgAnalyzed.RawData,3)-1)/emgSamplingFrequency,...
+    (emgAnalyzed.RawData./emgAnalyzed.Baseline1),3);
 
   % Compute the average voltage at each time point for all annotations
   emgAnalyzed.Average = sum(emgAnalyzed.RawData, 2)/size(emgAnalyzed.RawData,2);

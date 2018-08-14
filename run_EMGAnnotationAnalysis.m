@@ -1,4 +1,5 @@
-emgPathName = '/Users/chico/Downloads/emg/';
+emgPathName = '/Users/ayesha/Documents/Ayesha_phd_local storage/EMG data analysis/emg_data_files';
+savePathName = '/Users/ayesha/Documents/Ayesha_phd_local storage/EMG data analysis/emg_data_files/analysis/baselinechange';
 fname = {'18LLR_OFF_20180606_annotations.xlsx',...
 	'18LLR_OFF_20180607_annotations.xlsx',...
 	'18LLR_OFF_20180608_annotations.xlsx',...
@@ -23,14 +24,14 @@ fname = {'18LLR_OFF_20180606_annotations.xlsx',...
 % fname = {'18LLR_OFF_20180606_annotations.xlsx'};
 
 emgSamplingFrequency = 2000; %Hz
-videoSamplingFrequency = ;%; %Hz
+videoSamplingFrequency = 250;%; %Hz
 padding = 0.5; % 0.5s
 movingAverageWindow = 25/1000; % 25ms
 baselineEnd = 0.2; % 0.2s
 channels = 1:3;
 
 
-emgCounterReference = readtable('/Users/chico/Downloads/emg/annotations_18LLR_22UN_Master.txt');
+emgCounterReference = readtable('/Users/ayesha/Documents/Ayesha_phd_local storage/EMG data analysis/emg_data_files/annotations_18LLR_22UN_Master.txt');
 
 for f = 1:length(fname)
 	annotationFile = fullfile(emgPathName,fname{f});
@@ -53,14 +54,14 @@ for f = 1:length(fname)
 
 			% Retrieve emg data
 			emgDataAll = emgRetrieve(emgFilename);
-			save(fullfile(emgPathName,[trialName,'_RawEMGAll.mat']),'emgDataAll')
+			save(fullfile(savePathName,[trialName,'_RawEMGAll.mat']),'emgDataAll')
 			% Pick baseline
 			emgBaseline = emgDataAll(:,1:round(baselineEnd*emgSamplingFrequency));
 			% Select samples in the emg channel data that corresponds to the time stamp from the annotations data file
 			% Samples are chosen paddingDuration  before and after time stamp 
 			
 			[emg, ts] = emgExtractFromReach(emgDataAll,annotations(indx,:),emgCounterReference,videoSamplingFrequency,emgSamplingFrequency,padding);
-			out = emgDataAnalysis(emg(channels,:,:),emgBaseline,emgSamplingFrequency,ts);
+			out = emgDataAnalysis(emg(channels,:,:),emgBaseline(channels,:),emgSamplingFrequency,ts);
 			if (i==1)&&(j==1)
 				emgData=emg;
 				timestampEMG=ts;
@@ -74,17 +75,17 @@ for f = 1:length(fname)
 				  emgAnalyzed = setfield(emgAnalyzed,aField,cat(2, getfield(emgAnalyzed, aField),getfield(out, aField)));
 				end
 			end
-			save(fullfile(emgPathName,[trialName,'_RawEMGWindow.mat']),'emgData');
-			save(fullfile(emgPathName,[trialName,'_AnalyzedEMG.mat']),'emgAnalyzed','timestampEMG');
+			save(fullfile(savePathName,[trialName,'_RawEMGWindow.mat']),'emgData');
+			save(fullfile(savePathName,[trialName,'_AnalyzedEMG.mat']),'emgAnalyzed','timestampEMG');
 			a=[];
-	    fields = {'InitializeTimestamp','ReachTimestamp','PeakValueRawAverage','ClosestPeakPosition','ClosestPeakTimestamp','TimeToPeak','FoldChangeMean','AreaUnderCurveNormalized'};
+	    fields = {'InitializeTimestamp','ReachTimestamp','PeakValueRawAverage','ClosestPeakPosition','ClosestPeakTimestamp','TimeToPeak','FoldChangeMean','FoldChangeMean1','AreaUnderCurveNormalized','AreaUnderCurveNormalized1'};
 	    for k=1:length(fields)
 	    	a=cat(3,a,getfield(emgAnalyzed,fields{k}));
 	    end
 	    for k = channels
 	    	c=reshape(a(k,:,:),[size(a,2),size(a,3)]);
 	    	t = array2table(c,'VariableNames',fields);
-	    	writetable(t,fullfile(emgPathName,[trialName,'_EMGAnalysis.xlsx']),'Sheet',k)
+	    	writetable(t,fullfile(savePathName,[trialName,'_EMGAnalysis.xlsx']),'Sheet',k)
 	    end
 
 			% h=figure('Name',trialName);
