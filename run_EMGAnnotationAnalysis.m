@@ -74,7 +74,7 @@ for f = 1:length(fname)
 				fields = fieldnames(out);
 				for k = 1:numel(fields)
 				  aField     = fields{k};
-				  emgAnalyzed = setfield(emgAnalyzed,aField,cat(2, getfield(emgAnalyzed, aField),getfield(out, aField)));
+				  emgAnalyzed = setfield(emgAnalyzed,aField,cat(2, emgAnalyzed.(aField),out.(aField)));
 				end
 			end
 			save(fullfile(savePathName,[trialName,'_RawEMGWindow.mat']),'emgData','trialName','animal','trialDate');
@@ -84,9 +84,15 @@ for f = 1:length(fname)
 	    datafields = {'ReachNumber','InitializeTimestamp','ReachTimestamp','PeakValueRawAverage','ClosestPeakPosition','ClosestPeakTimestamp','TimeToPeak','CrossDoorwayTimeStamp','GraspTimestamp','RetrieveTimestamp','LaserLightOnTimestamp','LaserLightOffTimestamp','FoldChangeMean','FoldChangeMean1','AreaUnderCurveNormalized','AreaUnderCurveNormalized1'};
 	    metadata = {trialName;animal;trialDate};
 	    metaidx = repmat(1:size(metadata,1),[size(emgAnalyzed.ReachTimestamp,2) 1]);
-	    metatable = array2table(metadata(metaidx),'VariableNames',metafields);
+	    if size(emgAnalyzed.ReachTimestamp,2)==1
+	    	% When only one row exists, indexed data (metadata(metaidx)) is returning column vector instead of row
+	    	% Hence, hack - transposing it
+	    	metatable = array2table(metadata(metaidx)','VariableNames',metafields); 
+	    else
+	    	metatable = array2table(metadata(metaidx),'VariableNames',metafields);
+	    end
 	    for k=1:length(datafields)
-	    	datamat = cat(3,datamat,getfield(emgAnalyzed,datafields{k}));
+	    	datamat = cat(3,datamat,emgAnalyzed.(datafields{k}));
 	    end
 	    for k = channels
 	    	datamatx = reshape(datamat(k,:,:),[size(datamat,2),size(datamat,3)]);
