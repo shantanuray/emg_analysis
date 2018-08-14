@@ -19,7 +19,7 @@ function [emgData,timestampEMG] = emgExtractFromReach(record,annotations,emgCoun
   timestampEMG.Retrieve = (annotations.Retrieve-annotations.LEDCounterFrame)/videoSamplingFrequency+timestampEMG.Counter;
   timestampEMG.LaserLightOn = (annotations.LaserLightOn-annotations.LEDCounterFrame)/videoSamplingFrequency+timestampEMG.Counter;
   timestampEMG.LaserLightOff = (annotations.LaserLightOff-annotations.LEDCounterFrame)/videoSamplingFrequency+timestampEMG.Counter;
-  timestampEMG.StartStop = (annotations.Reach-annotations.LEDCounterFrame)/videoSamplingFrequency+timestampEMG.Counter;
+  timestampEMG.StartStop = timestampEMG.Reach;
   
   for i=1:size(record,1)
     emgData(i,:,:) = emgSelect(record(i,:), timestampEMG.StartStop, padding, emgSamplingFrequency);

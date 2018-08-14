@@ -46,6 +46,8 @@ for f = 1:length(fname)
 	for i = 1:length(Animal)
 		for j = 1:length(Dates)
 			% Assumption emg filename is export_18LLR_20180622.edf
+			animal=Animal{i};
+			trialDate=Dates(j);
 			emgFilename = fullfile(emgPathName,...
 			  ['export_',Animal{i},'_',num2str(Dates(j)),'.edf']);
 			% load('/Users/chico/Downloads/emg/18LLR_OFF_20180606_RawEMG_All.mat')
@@ -61,7 +63,7 @@ for f = 1:length(fname)
 			% Samples are chosen paddingDuration  before and after time stamp 
 			
 			[emg, ts] = emgExtractFromReach(emgDataAll,annotations(indx,:),emgCounterReference,videoSamplingFrequency,emgSamplingFrequency,padding);
-			out = emgDataAnalysis(emg(channels,:,:),emgBaseline(channels,:),emgSamplingFrequency,ts);
+			out = emgDataAnalysis(emg(channels,:,:),annotations,emgBaseline(channels,:),emgSamplingFrequency,ts);
 			if (i==1)&&(j==1)
 				emgData=emg;
 				timestampEMG=ts;
@@ -75,36 +77,22 @@ for f = 1:length(fname)
 				  emgAnalyzed = setfield(emgAnalyzed,aField,cat(2, getfield(emgAnalyzed, aField),getfield(out, aField)));
 				end
 			end
-			save(fullfile(savePathName,[trialName,'_RawEMGWindow.mat']),'emgData');
-			save(fullfile(savePathName,[trialName,'_AnalyzedEMG.mat']),'emgAnalyzed','timestampEMG');
-			a=[];
-	    fields = {'InitializeTimestamp','ReachTimestamp','PeakValueRawAverage','ClosestPeakPosition','ClosestPeakTimestamp','TimeToPeak','FoldChangeMean','FoldChangeMean1','AreaUnderCurveNormalized','AreaUnderCurveNormalized1'};
-	    for k=1:length(fields)
-	    	a=cat(3,a,getfield(emgAnalyzed,fields{k}));
+			save(fullfile(savePathName,[trialName,'_RawEMGWindow.mat']),'emgData','trialName','animal','trialDate');
+			save(fullfile(savePathName,[trialName,'_AnalyzedEMG.mat']),'emgAnalyzed','timestampEMG','animal','trialDate');
+			datamat=[];
+	    metafields = {'TrialName','Animal','Date'};
+	    datafields = {'ReachNumber','InitializeTimestamp','ReachTimestamp','PeakValueRawAverage','ClosestPeakPosition','ClosestPeakTimestamp','TimeToPeak','CrossDoorwayTimeStamp','GraspTimestamp','RetrieveTimestamp','LaserLightOnTimestamp','LaserLightOffTimestamp','FoldChangeMean','FoldChangeMean1','AreaUnderCurveNormalized','AreaUnderCurveNormalized1'};
+	    metadata = {trialName;animal;trialDate};
+	    metaidx = repmat(1:size(metadata,1),[size(emgAnalyzed.ReachTimestamp,2) 1]);
+	    metatable = array2table(metadata(metaidx),'VariableNames',metafields);
+	    for k=1:length(datafields)
+	    	datamat = cat(3,datamat,getfield(emgAnalyzed,datafields{k}));
 	    end
 	    for k = channels
-	    	c=reshape(a(k,:,:),[size(a,2),size(a,3)]);
-	    	t = array2table(c,'VariableNames',fields);
-	    	writetable(t,fullfile(savePathName,[trialName,'_EMGAnalysis.xlsx']),'Sheet',k)
+	    	datamatx = reshape(datamat(k,:,:),[size(datamat,2),size(datamat,3)]);
+	    	datatable = array2table(datamatx,'VariableNames',datafields);
+	    	writetable([metatable,datatable],fullfile(savePathName,[trialName,'_EMGAnalysis.xlsx']),'Sheet',k)
 	    end
-
-			% h=figure('Name',trialName);
-			% subplot(3,1,1)
-			% plot((0:size(emgAnalyzed.Average,3)-1)/emgSamplingFrequency,reshape(emgAnalyzed.Average(1,1,:),1,1601))
-			% hold on
-			% plot((0:size(emgAnalyzed.Average,3)-1)/emgSamplingFrequency,reshape(emgAnalyzed.MovingAverage(1,1,:),1,1601),'r')
-			% title('Channel1')
-			% subplot(3,1,2)
-			% plot((0:size(emgAnalyzed.Average,3)-1)/emgSamplingFrequency,reshape(emgAnalyzed.Average(2,1,:),1,1601))
-			% hold on
-			% plot((0:size(emgAnalyzed.Average,3)-1)/emgSamplingFrequency,reshape(emgAnalyzed.MovingAverage(2,1,:),1,1601),'r')
-			% title('Channel2')
-			% subplot(3,1,3)
-			% plot((0:size(emgAnalyzed.Average,3)-1)/emgSamplingFrequency,reshape(emgAnalyzed.Average(3,1,:),1,1601))
-			% hold on
-			% plot((0:size(emgAnalyzed.Average,3)-1)/emgSamplingFrequency,reshape(emgAnalyzed.MovingAverage(3,1,:),1,1601),'r')
-			% title('Channel3')
-			% hold off
 		end
 	end
 end

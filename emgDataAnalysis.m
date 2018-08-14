@@ -1,4 +1,4 @@
-function emgAnalyzed = emgDataAnalysis(emgRawData,emgBaseline,emgSamplingFrequency,timestampEMG)
+function emgAnalyzed = emgDataAnalysis(emgRawData,annotations,emgBaseline,emgSamplingFrequency,timestampEMG)
 
   activityStart=0.2;
   activityEnd=0.6;
@@ -31,10 +31,16 @@ function emgAnalyzed = emgDataAnalysis(emgRawData,emgBaseline,emgSamplingFrequen
   % Compute peak and peak time in the raw signal
   for i = 1:size(emgAnalyzed.RawAverage,1)
     for j = 1:size(emgAnalyzed.RawAverage,2)
+      emgAnalyzed.ReachNumber(i,j) = annotations.Index(j);
       initpos = reachpos+round((timestampEMG.Initialize(j)-timestampEMG.Reach(j))*emgSamplingFrequency);
       emgAnalyzed.ReachTimestamp(i,j) = reachpos/emgSamplingFrequency;
       emgAnalyzed.InitializeTimestamp(i,j) = initpos/emgSamplingFrequency;
-      emgAnalyzed.TimeToPeakms(i,j) = (reachpos-initpos)*1000/emgSamplingFrequency;
+      emgAnalyzed.CrossDoorwayTimeStamp(i,j) = timestampEMG.Initialize(j)-timestampEMG.Reach(j)+emgAnalyzed.ReachTimestamp(i,j);
+      emgAnalyzed.GraspTimestamp(i,j) = timestampEMG.Grasp(j)-timestampEMG.Reach(j)+emgAnalyzed.ReachTimestamp(i,j);
+      emgAnalyzed.RetrieveTimestamp(i,j) = timestampEMG.Retrieve(j)-timestampEMG.Reach(j)+emgAnalyzed.ReachTimestamp(i,j);
+      emgAnalyzed.LaserLightOnTimestamp(i,j) = timestampEMG.LaserLightOn(j)-timestampEMG.Reach(j)+emgAnalyzed.ReachTimestamp(i,j);
+      emgAnalyzed.LaserLightOffTimestamp(i,j) = timestampEMG.LaserLightOff(j)-timestampEMG.Reach(j)+emgAnalyzed.ReachTimestamp(i,j);
+      emgAnalyzed.TimeToPeakms(i,j) = (emgAnalyzed.ReachTimestamp(i,j)-emgAnalyzed.InitializeTimestamp(i,j))*1000;
       emgAnalyzed.PeakValueRawAverage(i,j) = max(emgAnalyzed.RawAverage(i,j,initpos:end),[],3);
       closestpeak = find(emgAnalyzed.RawAverage(i,j,initpos:end)==emgAnalyzed.PeakValueRawAverage(i,j),1);
       emgAnalyzed.ClosestPeakPosition(i,j) = closestpeak+initpos;
