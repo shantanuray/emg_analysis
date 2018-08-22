@@ -1,5 +1,5 @@
 emgPathName = '/Users/ayesha/Documents/Ayesha_phd_local storage/EMG data analysis/emg_data_files';
-savePathName = '/Users/ayesha/Documents/Ayesha_phd_local storage/EMG data analysis/18LLR/Day4/analysis/baselinechange';
+savePathName = '/Users/ayesha/Documents/Ayesha_phd_local storage/EMG data analysis/18LLR/Day4/analysis/clean_working';
 label = '18LLR_Day4_OFF';
 fname = {'/Users/ayesha/Documents/Ayesha_phd_local storage/EMG data analysis/18LLR/Day4/annotations_OFF_S_CD.csv',...
 	'/Users/ayesha/Documents/Ayesha_phd_local storage/EMG data analysis/18LLR/Day4/annotations_OFF_S_G.csv',...
