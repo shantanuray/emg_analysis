@@ -1,4 +1,4 @@
-function emgAnalyzed = emgDataAnalysis(emgRawData,annotations,emgBaseline,emgSamplingFrequency,timestampEMG)
+function emgAnalyzed = emgDataAnalysis(emgCleanData,annotations,emgBaseline,emgSamplingFrequency,timestampEMG)
 
   activityStart=0.2;
   activityEnd=0.6;
@@ -7,7 +7,7 @@ function emgAnalyzed = emgDataAnalysis(emgRawData,annotations,emgBaseline,emgSam
   % Remove window of 0.1
   removewindow = round(removewindow*emgSamplingFrequency);
 
-  emgAnalyzed.RawData = emgRawData(:,:,removewindow+1:size(emgRawData,3)-removewindow);
+  emgAnalyzed.RawData = emgCleanData(:,:,removewindow+1:size(emgCleanData,3)-removewindow);
 
   % Compute mVolt activity within the reach
   activityStart = round(activityStart*emgSamplingFrequency)+1;

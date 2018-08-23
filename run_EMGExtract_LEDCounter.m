@@ -1,5 +1,5 @@
-emgPathName = '/Users/ayesha/Documents/Ayesha_phd_local storage/EMG data analysis/emg_data_files';
-savePathName = '/Users/ayesha/Documents/Ayesha_phd_local storage/EMG data analysis/18LLR/Day4/analysis/clean_working';
+emgPathName   = '/Users/ayesha/Documents/Ayesha_phd_local storage/EMG data analysis/emg_data_files';
+savePathName  = '/Users/ayesha/Documents/Ayesha_phd_local storage/EMG data analysis/18LLR/Day4/analysis/clean_working';
 label = '18LLR_Day4_OFF';
 fname = {'/Users/ayesha/Documents/Ayesha_phd_local storage/EMG data analysis/18LLR/Day4/annotations_OFF_S_CD.csv',...
 	'/Users/ayesha/Documents/Ayesha_phd_local storage/EMG data analysis/18LLR/Day4/annotations_OFF_S_G.csv',...
@@ -29,7 +29,7 @@ emgAnalyzed = struct();
 
 % Retrieve emg data
 disp(['Reading entire EMG Data from ' emgFilename])
-emgDataAll = emgRetrieve(emgFilename);
+[emgDataAll, emgFiltered, emgRaw] = emgRetrieve(emgFilename);
 % load('/Users/chico/Downloads/emg/18LLR_OFF_20180606_RawEMG_All.mat')
 % Pick baseline
 emgBaseline = emgDataAll(:,1:round(baselineEnd*emgSamplingFrequency));
@@ -44,15 +44,19 @@ for f = 1:length(fname)
   % Select samples in the emg channel data that corresponds to the time stamp from the led counter data file
   % Samples are chosen padding duration before and after time stamp 
   disp(['Extracting window of ', sprintf('%0.2f',padding)  ,' around LED counter'])
-  [emg, ts] = emgExtractFromLEDCounter(emgDataAll,emgCounterReference,videoSamplingFrequency,emgSamplingFrequency,padding);
+  [emg, ts]     = emgExtractFromLEDCounter(emgDataAll,emgCounterReference,videoSamplingFrequency,emgSamplingFrequency,padding);
+  emg_filtered  = emgExtractFromLEDCounter(emgFiltered,emgCounterReference,videoSamplingFrequency,emgSamplingFrequency,padding);
+  emg_raw       = emgExtractFromLEDCounter(emgRaw,emgCounterReference,videoSamplingFrequency,emgSamplingFrequency,padding);
   disp(['Analysis in progress'])
   out = emgDataAnalysisLEDCounter(emg(channels,:,:),emgBaseline(channels,:),emgSamplingFrequency,ts);
   if (f==1)
     emgData=emg;
+    emgFilteredWindow=emg_filtered;
+    emgRawWindow=emg_raw;
     timestampEMG=ts;
     emgAnalyzed=out;
   else
-    emgData = cat(2,emgData,emg);
+    emgData = cat(2,emgData,emg);emgFilteredWindow = cat(2,emgFilteredWindow,emg_filtered);emgRawWindow = cat(2,emgRawWindow,emg_raw);
     timestampEMG = cell2struct(cellfun(@vertcat,struct2cell(timestampEMG),struct2cell(ts),'uni',0),fieldnames(ts),1);
     fields = fieldnames(out);
     for k = 1:numel(fields)
@@ -62,8 +66,8 @@ for f = 1:length(fname)
   end
 end
 disp(['Saving output in ' savePathName])
-save(fullfile(savePathName,[label,'_RawEMGAll.mat']),'emgDataAll')
-save(fullfile(savePathName,[label,'_RawEMGWindow.mat']),'emgData');
+save(fullfile(savePathName,[label,'_RawEMGAll.mat']),'emgDataAll','emgFiltered','emgRaw')
+save(fullfile(savePathName,[label,'_RawEMGWindow.mat']),'emgData','emgFilteredWindow','emgRawWindow');
 save(fullfile(savePathName,[label,'_AnalyzedEMG.mat']),'emgAnalyzed','timestampEMG');
 a=[];
 fields = {'FoldChangeMean','FoldChangeMean1','AreaUnderCurveNormalized','AreaUnderCurveNormalized1'};

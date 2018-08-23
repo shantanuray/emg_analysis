@@ -19,10 +19,6 @@ fname = {'18LLR_OFF_20180606_annotations.xlsx',...
   '22UN_ONI_20180607_annotations.xlsx',...
   '22UN_ONI_20180608_annotations.xlsx'};
 
-% fname = {'18LLR_ONG_annotations.xlsx'};
-
-% fname = {'18LLR_OFF_20180606_annotations.xlsx'};
-
 emgSamplingFrequency = 2000; %Hz
 videoSamplingFrequency = 250;%; %Hz
 padding = 0.5; % 0.5s
@@ -57,6 +53,7 @@ for f = 1:length(fname)
       % Retrieve emg data
       [emgClean, emgFiltered, emgRaw] = emgRetrieve(emgFilename);
       save(fullfile(savePathName,[trialName,'_RawEMGAll.mat']),'emgClean','emgFiltered','emgRaw')
+      % load(fullfile(savePathName,[trialName,'_RawEMGAll.mat']));
       % Pick baseline
       emgBaseline = emgClean(:,1:round(baselineEnd*emgSamplingFrequency));
       % Select samples in the emg channel data that corresponds to the time stamp from the annotations data file
@@ -69,12 +66,12 @@ for f = 1:length(fname)
       out = emgDataAnalysis(emg(channels,:,:),annotations,emgBaseline(channels,:),emgSamplingFrequency,ts);
       if (i==1)&&(j==1)
         emgData=emg;
-        emgFiltered=emg_filtered;
-        emgRaw=emg_raw;
+        emgFilteredWindow=emg_filtered;
+        emgRawWindow=emg_raw;
         timestampEMG=ts;
         emgAnalyzed=out;
       else
-        emgData = cat(2,emgData,emg);emgFiltered = cat(2,emgFiltered,emg_filtered);emgRaw = cat(2,emgRaw,emg_raw);
+        emgData = cat(2,emgData,emg);emgFilteredWindow = cat(2,emgFilteredWindow,emg_filtered);emgRawWindow = cat(2,emgRawWindow,emg_raw);
         timestampEMG = cell2struct(cellfun(@vertcat,struct2cell(timestampEMG),struct2cell(ts),'uni',0),fieldnames(ts),1);
         fields = fieldnames(out);
         for k = 1:numel(fields)
@@ -82,7 +79,7 @@ for f = 1:length(fname)
           emgAnalyzed = setfield(emgAnalyzed,aField,cat(2, getfield(emgAnalyzed, aField),getfield(out, aField)));
         end
       end
-      save(fullfile(savePathName,[trialName,'_RawEMGWindow.mat']),'emgData','emgFiltered','emgRaw','trialName','animal','trialDate');
+      save(fullfile(savePathName,[trialName,'_RawEMGWindow.mat']),'emgData','emgFilteredWindow','emgRawWindow','trialName','animal','trialDate');
       save(fullfile(savePathName,[trialName,'_AnalyzedEMG.mat']),'emgAnalyzed','timestampEMG','animal','trialDate');
       datamat=[];
       metafields = {'TrialName','Animal','Date'};
