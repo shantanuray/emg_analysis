@@ -19,7 +19,13 @@ binSamples = round(binSize*emgSamplingFrequency,0);
 % Note that emgDataAnalysis.m saves Timestamps for all channels
 % But in essence, they are the same across the channels
 % So here we choose the channel = 1
-refEventTimestamp = getfield(emgAnalyzed, [refEvent,'Timestamp']);
+if isfield(emgAnalyzed, [refEvent,'Timestamp'])
+  refEventTimestamp = getfield(emgAnalyzed, [refEvent,'Timestamp']);
+else
+  disp('-------- WARNING --------')
+  disp(['Recording does not have ', refEvent,' Timestamp. Choosing center of recording.'])
+  refEventTimestamp = size(emgAnalyzed.Average,3)/emgSamplingFrequency/2;
+end;
 
 % Reference event timestamps could vary from one recording to another
 % So we take standard deviation around the mean to include all values
