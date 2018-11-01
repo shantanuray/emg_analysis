@@ -45,17 +45,33 @@ refEventRange = refEventMean + [-1 1]*refEventSTD + [-timeBeforeReference timeAf
 % To get equal bins of size binSamples, we divide and then multiply by binSamples
 refEventSamples = round(refEventRange*emgSamplingFrequency/binSamples,0)*binSamples;
 
-numBins = [refEventSamples(2) - refEventSamples(1)]/binSamples;
+%numBins = [refEventSamples(2) - refEventSamples(1)]/binSamples;
+edges = 0:binSamples:refEventSamples(2) - refEventSamples(1);
 
-emg = emgAnalyzed.Average(:,:,refEventSamples(1)+1:refEventSamples(2));
+% Get the EMG data for all channels (1st DIM) and all annotations files (2nd DIM)
+% for the sampling range (3rd DIM)
+emgAll = emgAnalyzed.Average(:,:,refEventSamples(1)+1:refEventSamples(2));
 
-for i = channels
-  % [N(i,:),edges(i,:)] = histcounts(emg_lighton(i,1,:),num_bins);
-  % r = N(i,:)/bin_size; % Frequency? Not sure if this is a good idea
-  % figure;
-  % ph=bar(edges(i,1:end-1),r(1:end)); % Same as histogram plot
-  figure;
-  PSTH(i) = histogram(emg(i,1,:), numBins);
-  N(i,:) = get(PSTH(i),'Values');
-  edges(i,:) = get(PSTH(i),'BinEdges');
+for i = channels            % Channels (1st DIM)
+  for j = 1:size(emgAll,2)  % Annotations files (2nd DIM)
+    % [N(i,:),edges(i,:)] = histcounts(emg_lighton(i,1,:),num_bins);
+    % r = N(i,:)/bin_size; % Frequency? Not sure if this is a good idea
+    % figure;
+    % ph=bar(edges(i,1:end-1),r(1:end)); % Same as histogram plot
+    emg = reshape(emgAll(:,j,:), size(emgAll,1), size(emgAll,3)); % Just for simplicity
+    % Mark timestamp where EMG is greater than threshold
+    threshold = mean(emg(i,:)); %0.2*max(emg(i,:));
+    X = find(emg(i,:)>threshold);  
+    h=figure('Name',['Channel: ' num2str(i) '; File: ' num2str(j)]);
+    axes1 = axes('Parent',h);
+    hold(axes1,'on');
+    % Histogram will then count timestamps in the given bin where EMG>threshold
+    % i.e. Frequency of spikes
+    PSTH(i,j) = histogram(X, edges);
+    xtickValue = 0:0.05*emgSamplingFrequency:refEventSamples(2) - refEventSamples(1);
+    xtickLabel = cellstr(num2str((-timeBeforeReference:0.05:timeAfterReference)'*1000));
+    set(axes1,'XTick',xtickValue,'XTickLabel',xtickLabel);
+    N(i,j,:) = get(PSTH(i),'Values');
+  end
 end
+numBins = get(PSTH(i,j),'NumBins');
