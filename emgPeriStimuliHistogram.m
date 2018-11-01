@@ -24,7 +24,7 @@ if isfield(emgAnalyzed, [refEvent,'Timestamp'])
 else
   disp('-------- WARNING --------')
   disp(['Recording does not have ', refEvent,' Timestamp. Choosing center of recording.'])
-  refEventTimestamp = size(emgAnalyzed.Average,3)/emgSamplingFrequency/2;
+  refEventTimestamp = (((size(emgAnalyzed.Average,3)-1)/2)+1)/emgSamplingFrequency;
 end;
 
 % Reference event timestamps could vary from one recording to another
