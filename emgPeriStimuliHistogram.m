@@ -58,10 +58,11 @@ for i = channels            % Channels (1st DIM)
     % r = N(i,:)/bin_size; % Frequency? Not sure if this is a good idea
     % figure;
     % ph=bar(edges(i,1:end-1),r(1:end)); % Same as histogram plot
-    emg = reshape(emgAll(:,j,:), size(emgAll,1), size(emgAll,3)); % Just for simplicity
+    emg = reshape(emgAll(i,j,:), size(emgAll,1), size(emgAll,3)); % Just for simplicity
     % Mark timestamp where EMG is greater than threshold
-    threshold = mean(emg(i,:)); %0.2*max(emg(i,:));
-    X = find(emg(i,:)>threshold);  
+    threshold = mean(emg); %0.2*max(emg(i,:));
+    [pks,locs] = findpeaks(emg);    % Find the peaks and peak location of the EMG
+    X = locs(find(pks>threshold));  % Get the peak location > threshold (=> sample number => timestamp)
     h=figure('Name',['Channel: ' num2str(i) '; File: ' num2str(j)]);
     axes1 = axes('Parent',h);
     hold(axes1,'on');
@@ -70,8 +71,10 @@ for i = channels            % Channels (1st DIM)
     PSTH(i,j) = histogram(X, edges);
     xtickValue = 0:0.05*emgSamplingFrequency:refEventSamples(2) - refEventSamples(1);
     xtickLabel = cellstr(num2str((-timeBeforeReference:0.05:timeAfterReference)'*1000));
-    set(axes1,'XTick',xtickValue,'XTickLabel',xtickLabel);
-    N(i,j,:) = get(PSTH(i),'Values');
+    ytickValue = get(axes1,'YTick')/binSize; % Convert to frequency - observation/binSize
+    ytickLabel = cellstr(num2str(ytickValue));
+    set(axes1,'XTick',xtickValue,'XTickLabel',xtickLabel,'YTick',ytickValue,'YTickLabel',ytickLabel);
+    N(i,j,:) = get(PSTH(i,j),'Values')/binSize;
   end
 end
 numBins = get(PSTH(i,j),'NumBins');
