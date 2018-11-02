@@ -58,7 +58,7 @@ for i = channels            % Channels (1st DIM)
     % r = N(i,:)/bin_size; % Frequency? Not sure if this is a good idea
     % figure;
     % ph=bar(edges(i,1:end-1),r(1:end)); % Same as histogram plot
-    emg = reshape(emgAll(i,j,:), size(emgAll,1), size(emgAll,3)); % Just for simplicity
+    emg = reshape(emgAll(i,j,:), 1, size(emgAll,3)); % Just for simplicity
     % Mark timestamp where EMG is greater than threshold
     threshold = mean(emg); %0.2*max(emg(i,:));
     [pks,locs] = findpeaks(emg);    % Find the peaks and peak location of the EMG
