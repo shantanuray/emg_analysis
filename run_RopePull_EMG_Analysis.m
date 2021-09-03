@@ -1,13 +1,14 @@
-emgPathName = 'C:\Users\shantanu.ray\Downloads';
-cflRefFile = 'CFL_3_Ref.csv';
+pkg load signal
+emgPathName = 'C:\Users\shantanu.ray\Dropbox\Ayesha\CFL3';
+cflRefFile = 'CFL3-3_saline_pull_5.csv';
 fid = fopen(fullfile(emgPathName,cflRefFile), 'r');
-cflRef =  textscan(fid, '%s%u%f%f%f%f%d%f%d%s%s', 'delimiter',',', 'EndOfLine', '\n');
+% cflHeader = fgetl(fid, ',');
+cflRef =  textscan(fid, '%s%u%f%f%f%f%d%f%d', 'delimiter',',', 'EndOfLine', '\n');
 fclose(fid);
 
-savePathName = 'C:/Users/shantanu.ray/Downloads/';
 dataFname = {'CFL3-3_saline_pull_5.mat'};
 
-movingAverageWindow = 30/1000; % 30ms
+movingAverageWindow = 100/1000; % 100ms
 channels = {'bi','tri','trap','ecu'};
 emgData = struct([]);
 for f = 1:length(dataFname)
@@ -43,8 +44,6 @@ for f = 1:length(dataFname)
     emgData(f).(channels{chan}).pullingBout = cflRef{1,7}(idx); % 7 -> pulling bout
     emgData(f).(channels{chan}).totalTime = cflRef{1,8}(idx); % 8 -> total time
     emgData(f).(channels{chan}).totalFrameNo = cflRef{1,9}(idx); % 9 -> totalFrameNo
-    emgData(f).(channels{chan}).tag = cflRef{1,10}(idx); % 10 -> tag (discrete, rhythmic, both)
-    emgData(f).(channels{chan}).notes = cflRef{1,11}(idx); % 11 -> extra notes
     channels{chan}
     % Time stamps may be slightly incorrect. Compensate for length of data
     pos1Samp = ceil(fs*emgData(f).(channels{chan}).pos1)
@@ -87,8 +86,8 @@ for f = 1:length(dataFname)
       	emgData(f).(channels{chan}).rhythmic.raw = [];
     endif
   endfor
+  save(fullfile(emgPathName, [fileID, '_out.mat']), 'emgData')
 endfor
-
 
 figure
 subplot(2,1,1)
@@ -108,43 +107,96 @@ ts3 = ts3(1:length(emgData(1).bi.rhythmic.raw));
 plot(ts3, emgData(1).bi.rhythmic.raw)
 
 
+minPeakDistance = 100/1000; % 100 ms
+% figure
+% hold on
+% for plotNum = 1:2:length(channels)*2
+% 	chan = (plotNum - 1)/2 + 1
+% 	% plot discrete
+% 	subplot(4, 2, plotNum)
+% 	data_d = emgData(1).(channels{chan}).discrete.mva;
+% 	ts1 = emgData(f).(channels{chan}).pos1:1/emgData(f).(channels{chan}).fs:emgData(1).(channels{chan}).pos2;
+% 	ts1 = ts1(1:length(data_d));
+% 	[pks1, idx1] = findpeaks(data_d, 'MinPeakDistance', round(minPeakDistance*fs));
+% 	plot(ts1, data_d, ts1(idx1), data_d(idx1), 'xm')
+% 	% plot rhythmic
+% 	subplot(4, 2, plotNum+1)
+% 	data_r = emgData(1).(channels{chan}).rhythmic.mva;
+% 	ts2 = emgData(f).(channels{chan}).pos2:1/emgData(f).(channels{chan}).fs:emgData(1).(channels{chan}).pos3;
+% 	ts2 = ts2(1:length(data_r));
+% 	[pks2, idx2] = findpeaks(data_r, 'MinPeakDistance', round(minPeakDistance*fs));
+% 	plot(ts2, data_r, ts2(idx2), data_r(idx2), 'xm')
+% endfor
+% hold off
+
+% figure
+% hold on
+% for plotNum = 1 %:2:length(channels)*2
+% 	chan = (plotNum - 1)/2 + 1
+% 	% plot discrete
+% 	subplot(1, 2, plotNum)
+% 	data_d = emgData(1).(channels{chan}).discrete.mva;
+% 	data_d_rms = rms(data_d);
+% 	ts1 = emgData(f).(channels{chan}).pos1:1/emgData(f).(channels{chan}).fs:emgData(1).(channels{chan}).pos2;
+% 	ts1 = ts1(1:length(data_d));
+% 	[pks1, idx1] = findpeaks(data_d, 'MinPeakDistance', round(minPeakDistance*fs), 'MinPeakHeight', );
+% 	plot(ts1, data_d, ts1(idx1), data_d(idx1), 'xm')
+% 	title('discrete')
+% 	% plot rhythmic
+% 	subplot(1, 2, plotNum+1)
+% 	data_r = emgData(1).(channels{chan}).rhythmic.mva;
+% 	data_r_rms = rms(data_r);
+% 	ts2 = emgData(f).(channels{chan}).pos2:1/emgData(f).(channels{chan}).fs:emgData(1).(channels{chan}).pos3;
+% 	ts2 = ts2(1:length(data_r));
+% 	[pks2, idx2] = findpeaks(data_r, 'MinPeakDistance', round(minPeakDistance*fs));
+% 	plot(ts2, data_r, ts2(idx2), data_r(idx2), 'xm')
+% 	title('rhythmic')
+% endfor
+% hold off
+
+rms_pct = [0.25, 0.35, 0.45];
 figure
 hold on
-for plotNum = 1:2:length(channels)*2
-	chan = (plotNum - 1)/2 + 1
-	% plot discrete
-	subplot(4, 2, plotNum)
-	data_d = emgData(1).(channels{chan}).discrete.mva;
-	ts1 = emgData(f).(channels{chan}).pos1:1/emgData(f).(channels{chan}).fs:emgData(1).(channels{chan}).pos2;
-	ts1 = ts1(1:length(data_d));
-	[pks1, idx1] = findpeaks(data_d, 'MinPeakDistance', round(movingAverageWindow*fs));
-	plot(ts1, data_d, ts1(idx1), data_d(idx1), 'xm')
-	% plot rhythmic
-	subplot(4, 2, plotNum+1)
-	data_r = emgData(1).(channels{chan}).rhythmic.mva;
-	ts2 = emgData(f).(channels{chan}).pos2:1/emgData(f).(channels{chan}).fs:emgData(1).(channels{chan}).pos3;
-	ts2 = ts2(1:length(data_r));
-	[pks2, idx2] = findpeaks(data_r, 'MinPeakDistance', round(movingAverageWindow*fs));
-	plot(ts2, data_r, ts2(idx2), data_r(idx2), 'xm')
+for plotNum = 0:length(rms_pct) %:2:length(channels)*2
+	chan = 1;
+	if plotNum == 0
+		% plot discrete
+		subplot(length(rms_pct)+1, 2, (plotNum)*2 + 1)
+		data_d = emgData(1).(channels{chan}).discrete.mva;
+		ts1 = emgData(f).(channels{chan}).pos1:1/emgData(f).(channels{chan}).fs:emgData(1).(channels{chan}).pos2;
+		ts1 = ts1(1:length(data_d));
+		[pks1, idx1] = findpeaks(data_d, 'MinPeakDistance', round(minPeakDistance*fs));
+		plot(ts1, data_d, ts1(idx1), data_d(idx1), 'xm')
+		title(sprintf('discrete MinPeakDistance %dms', round(minPeakDistance*1000)))
+		% plot rhythmic
+		subplot(length(rms_pct)+1, 2, (plotNum)*2 + 2)
+		data_r = emgData(1).(channels{chan}).rhythmic.mva;
+		ts2 = emgData(f).(channels{chan}).pos2:1/emgData(f).(channels{chan}).fs:emgData(1).(channels{chan}).pos3;
+		ts2 = ts2(1:length(data_r));
+		[pks2, idx2] = findpeaks(data_r, 'MinPeakDistance', round(minPeakDistance*fs));
+		plot(ts2, data_r, ts2(idx2), data_r(idx2), 'xm')
+		title(sprintf('rhythmic MinPeakDistance %dms', round(minPeakDistance*1000)))
+	else
+		% plot discrete
+		subplot(length(rms_pct)+1, 2, (plotNum)*2 + 1)
+		data_d = emgData(1).(channels{chan}).discrete.mva;
+		data_d_rms = rms(data_d(round(movingAverageWindow*fs):end));
+		data_d_rms
+		ts1 = emgData(f).(channels{chan}).pos1:1/emgData(f).(channels{chan}).fs:emgData(1).(channels{chan}).pos2;
+		ts1 = ts1(1:length(data_d));
+		[pks1, idx1] = findpeaks(data_d, 'MinPeakDistance', round(minPeakDistance*fs), 'MinPeakHeight', rms_pct(plotNum)*data_d_rms);
+		plot(ts1, data_d, ts1(idx1), data_d(idx1), 'xm')
+		title(sprintf('discrete MinPeakDistance %dms MinPeakHeight %3.2f', round(minPeakDistance*1000), rms_pct(plotNum)*data_d_rms))
+		% plot rhythmic
+		subplot(length(rms_pct)+1, 2, (plotNum)*2 + 2)
+		data_r = emgData(1).(channels{chan}).rhythmic.mva;
+		data_r_rms = rms(data_r(round(movingAverageWindow*fs):end));
+		data_r_rms
+		ts2 = emgData(f).(channels{chan}).pos2:1/emgData(f).(channels{chan}).fs:emgData(1).(channels{chan}).pos3;
+		ts2 = ts2(1:length(data_r));
+		[pks2, idx2] = findpeaks(data_r, 'MinPeakDistance', round(minPeakDistance*fs), 'MinPeakHeight', rms_pct(plotNum)*data_r_rms);
+		plot(ts2, data_r, ts2(idx2), data_r(idx2), 'xm')
+		title(sprintf('rhythmic MinPeakDistance %dms MinPeakHeight %3.2f', round(minPeakDistance*1000), rms_pct(plotNum)*data_r_rms))
+	endif
 endfor
-
-
-figure
-hold on
-for plotNum = 1 %:2:length(channels)*2
-	chan = (plotNum - 1)/2 + 1
-	% plot discrete
-	subplot(1, 2, plotNum)
-	data_d = emgData(1).(channels{chan}).discrete.mva;
-	ts1 = emgData(f).(channels{chan}).pos1:1/emgData(f).(channels{chan}).fs:emgData(1).(channels{chan}).pos2;
-	ts1 = ts1(1:length(data_d));
-	[pks1, idx1] = findpeaks(data_d, 'MinPeakDistance', round(movingAverageWindow*fs));
-	plot(ts1, data_d, ts1(idx1), data_d(idx1), 'xm')
-	% plot rhythmic
-	subplot(1, 2, plotNum+1)
-	data_r = emgData(1).(channels{chan}).rhythmic.mva;
-	ts2 = emgData(f).(channels{chan}).pos2:1/emgData(f).(channels{chan}).fs:emgData(1).(channels{chan}).pos3;
-	ts2 = ts2(1:length(data_r));
-	[pks2, idx2] = findpeaks(data_r, 'MinPeakDistance', round(movingAverageWindow*fs));
-	plot(ts2, data_r, ts2(idx2), data_r(idx2), 'xm')
-endfor
+hold off
