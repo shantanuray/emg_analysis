@@ -96,10 +96,6 @@ function emgData = emgSegmentRetrievev2(emgPathName,dataFname,refTags,varargin)
             emgData(1).(channels{chan}).discrete.tag = 'partial-discrete';
           endif
           emgData(1).(channels{chan}).discrete.raw = emgData(1).(channels{chan}).raw(1:min(totalSamp, pos2Samp));
-          % rectify bipolar emg signals
-          emgData(1).(channels{chan}).discrete.rectified = abs(emgData(1).(channels{chan}).discrete.raw);
-          % Moving average filter
-          emgData(1).(channels{chan}).discrete.mva = movingAverage(emgData(1).(channels{chan}).discrete.rectified, moving_average_window, fs);
         else
           emgData(1).(channels{chan}).discrete.tag = 'no-discrete';
           emgData(1).(channels{chan}).discrete.raw = [];
@@ -111,10 +107,6 @@ function emgData = emgSegmentRetrievev2(emgPathName,dataFname,refTags,varargin)
             emgData(1).(channels{chan}).rhythmic.tag = 'partial-rhythmic';
           endif
           emgData(1).(channels{chan}).rhythmic.raw = emgData(1).(channels{chan}).raw(pos2Samp:min(totalSamp, pos3Samp));
-          % rectify bipolar emg signals
-          emgData(1).(channels{chan}).rhythmic.rectified = abs(emgData(1).(channels{chan}).rhythmic.raw);
-          % Moving average filter
-          emgData(1).(channels{chan}).rhythmic.mva = movingAverage(emgData(1).(channels{chan}).rhythmic.rectified, moving_average_window, fs);
         else
           emgData(1).(channels{chan}).rhythmic.tag = 'no-rhythmic';
           emgData(1).(channels{chan}).rhythmic.raw = [];

@@ -6,7 +6,6 @@ function emgData = emgSegmentRetrieveFolder(emgPathName)
     % - Segment data
     % - Filter data (moving average)
     % - Store data in structure 
-	pkg load signal
 	emgPaths = {'D:\U19\CFL5', 'D:\U19\CFL4', 'D:\U19\JFL2'};
 
 	% Get EMG MAT file names
