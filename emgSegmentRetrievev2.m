@@ -75,7 +75,7 @@ function emgData = emgSegmentRetrievev2(emgPathName,dataFname,refTags,varargin)
       
       for chan = 1:length(channels)
         fs =  1/emgRaw.([fileID1, '_', channels{chan}]).interval;
-        emgData(1).(channels{chan}).control = refTags{1,2}(idx); % Col 2 -> control true - 1 or false - 0
+        emgData(1).(channels{chan}).conditon = refTags{1,2}(idx); % Col 2 -> conditon true - cno or false - control
         emgData(1).(channels{chan}).timePostCNO = refTags{1,3}(idx); % 3->time post CNO
         emgData(1).(channels{chan}).pos1 = pos1;
         emgData(1).(channels{chan}).pos2 = pos2;
