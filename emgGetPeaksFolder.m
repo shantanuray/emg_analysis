@@ -13,11 +13,12 @@ function [peakData, peakMetrics, peakDistances] = emgGetPeaksFolder(emgData, var
     % Parameters:
     % channels - {'bi', 'tri', 'ecu', 'trap'}
     % segments - {'discrete', 'rhythmic'}
+    % movingAverageWindow - for filtering: 100 ms (0.1)
     % minPeakDistance - for find_peaks: 100ms (0.1)
     % rmsPctCutoff - RMS cut off for min peak height: Default skip (NaN)
 
     p = readInput(varargin);
-    [channels, segments, minPeakDistance, rmsPctCutoff] = parseInput(p.Results);
+    [channels, segments, movingAverageWindow, minPeakDistance, rmsPctCutoff] = parseInput(p.Results);
     peakMetrics = NaN(length(emgData), length(channels), length(segments), 5);
     peakDistances = cell(length(channels), length(segments));
     peakData = emgData;
@@ -33,26 +34,28 @@ function [peakData, peakMetrics, peakDistances] = emgGetPeaksFolder(emgData, var
 							fs = emgData(i).(channels{j}).samplingFrequency;
 							data = emgData(i).(channels{j}).(segments{k}).raw;
 							peakData(i).(channels{j}).(segments{k}) = rmfield(peakData(i).(channels{j}).(segments{k}), 'raw');
-							% rectify bipolar emg signals
-							data = abs(data);
-							% Moving average filter
-							peakData(i).(channels{j}).(segments{k}).movingAverageWindow = moving_average_window;
-							data = movingAverage(data, moving_average_window, fs);
-							L = length(data);
-							% Get peaks
-							peakData(i).(channels{j}).(segments{k}).minPeakDistance = minPeakDistance;
-							peakData(i).(channels{j}).(segments{k}).rmsPctCutoff = rmsPctCutoff;
-							[pks, idx] = getPeaks(data, fs, 'minPeakDistance', minPeakDistance, 'rmsPctCutoff', rmsPctCutoff);
-							peakData(i).(channels{j}).(segments{k}).peakAmplitude = pks;
-							peakData(i).(channels{j}).(segments{k}).peakLocation = idx;
-							[pk_freq, pk_dist, pk_amp, pk_dist_std, pk_amp_std] = peakAnalysis(idx, pks, fs, L);
-							peakData(i).(channels{j}).(segments{k}).averageFrequency = pk_freq;
-							peakData(i).(channels{j}).(segments{k}).averagePeakDistance = pk_dist;
-							peakData(i).(channels{j}).(segments{k}).averagePeakAmplitude = pk_amp;
-							peakData(i).(channels{j}).(segments{k}).peakDistanceStdDev = pk_dist_std;
-							peakData(i).(channels{j}).(segments{k}).peakAmplitudeStdDev = pk_amp_std;
-							peakMetrics(i,j,k,:) = [pk_freq, pk_dist, pk_amp, pk_dist_std, pk_amp_std];
-							peakDistances{j,k} = [peakDistances{j,k};(idx(2:end)-idx(1:end-1))/fs];
+							if ~isempty(data)
+								% rectify bipolar emg signals
+								data = abs(data);
+								% Moving average filter
+								peakData(i).(channels{j}).(segments{k}).movingAverageWindow = movingAverageWindow;
+								data = movingAverage(data, movingAverageWindow, fs);
+								L = length(data);
+								% Get peaks
+								peakData(i).(channels{j}).(segments{k}).minPeakDistance = minPeakDistance;
+								peakData(i).(channels{j}).(segments{k}).rmsPctCutoff = rmsPctCutoff;
+								[pks, idx] = getPeaks(data, fs, 'minPeakDistance', minPeakDistance, 'rmsPctCutoff', rmsPctCutoff);
+								peakData(i).(channels{j}).(segments{k}).peakAmplitude = pks;
+								peakData(i).(channels{j}).(segments{k}).peakLocation = idx;
+								[pk_freq, pk_dist, pk_amp, pk_dist_std, pk_amp_std] = peakAnalysis(idx, pks, fs, L);
+								peakData(i).(channels{j}).(segments{k}).averageFrequency = pk_freq;
+								peakData(i).(channels{j}).(segments{k}).averagePeakDistance = pk_dist;
+								peakData(i).(channels{j}).(segments{k}).averagePeakAmplitude = pk_amp;
+								peakData(i).(channels{j}).(segments{k}).peakDistanceStdDev = pk_dist_std;
+								peakData(i).(channels{j}).(segments{k}).peakAmplitudeStdDev = pk_amp_std;
+								peakMetrics(i,j,k,:) = [pk_freq, pk_dist, pk_amp, pk_dist_std, pk_amp_std];
+								peakDistances{j,k} = [peakDistances{j,k};(idx(2:end)-idx(1:end-1))/fs];
+							end
 						end
 					end
 				end
@@ -64,24 +67,28 @@ function [peakData, peakMetrics, peakDistances] = emgGetPeaksFolder(emgData, var
     function p = readInput(input)
         %   - segments 				Default - {'discrete', 'rhythmic'}
         %   - channels              Default - {'bi','tri','trap','ecu'}
+        %	- movingAverageWindow 	Default - 100/1000; % 100ms
         %   - minPeakDistance     	Default - 100/1000; % 100ms
         %   - rmsPctCutoff       	Default - nan
         p = inputParser;
         channels = {'bi','tri','trap','ecu'};
         segments = {'discrete', 'rhythmic'};
+        movingAverageWindow = 100/1000;
         minPeakDistance = 100/1000;
         rmsPctCutoff = NaN;
         
         addParameter(p,'channels',channels, @iscell);
         addParameter(p,'segments',segments, @iscell);
+        addParameter(p,'movingAverageWindow',movingAverageWindow, @isnumeric);
         addParameter(p,'minPeakDistance',minPeakDistance, @isnumeric);
         addParameter(p,'rmsPctCutoff',rmsPctCutoff, @isnumeric);
         parse(p, input{:});
     end
 
-    function [channels, segments, minPeakDistance, rmsPctCutoff] = parseInput(p)
+    function [channels, segments, movingAverageWindow, minPeakDistance, rmsPctCutoff] = parseInput(p)
         channels = p.channels;
         segments = p.segments;
+        movingAverageWindow = p.movingAverageWindow;
         minPeakDistance = p.minPeakDistance;
         rmsPctCutoff = p.rmsPctCutoff;
     end
