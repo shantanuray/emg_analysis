@@ -3,17 +3,26 @@ function [peakAmplitude, peakLocation] = getPeaks(data, fs, varargin)
 %            			                   'minPeakDistance', 100/1000,
 %            			                   'rmsPctCutoff', 0.25);
 % Wrapper around find_peaks.m
-	pkg load signal % Load signal processing library
 
 	p = readInput(varargin);
     [minPeakDistance, rmsPctCutoff] = parseInput(p.Results);
 
-	data_rms = rms(data);
 	if isnan(rmsPctCutoff)
-		[peakAmplitude, peakLocation] = findpeaks(data, 'MinPeakDistance', round(minPeakDistance*fs));
+        if length(data) < round(minPeakDistance*fs)
+            [peakAmplitude, peakLocation] = findpeaks(data);
+        else
+		  [peakAmplitude, peakLocation] = findpeaks(data, 'MinPeakDistance', round(minPeakDistance*fs));
+        end
 	else
-		[peakAmplitude, peakLocation] = findpeaks(data, 'MinPeakDistance', round(minPeakDistance*fs), 'MinPeakHeight', rmsPctCutoff*data_rms);		
+        data_rms = rms(data);
+        if length(data) < round(minPeakDistance*fs)
+            [peakAmplitude, peakLocation] = findpeaks(data, 'MinPeakHeight', rmsPctCutoff*data_rms);
+        else
+          [peakAmplitude, peakLocation] = findpeaks(data, 'MinPeakDistance', round(minPeakDistance*fs), 'MinPeakHeight', rmsPctCutoff*data_rms);
+        end
 	end
+    return;
+
     %% Read input
     function p = readInput(input)
         %   - minPeakDistance     Default - 100/1000; % 100ms
