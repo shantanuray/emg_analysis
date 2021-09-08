@@ -1,0 +1,17 @@
+function [averageFrequency, averagePeakDistance, averagePeakAmplitude, peakDistanceStdDev, peakAmplitudeStdDev] = peakAnalysis(peakLocation, peakAmplitude, fs, dataLength)
+
+averageFrequency = length(peakLocation)*fs/dataLength;
+peak_dist = peakLocation(2:end) - peakLocation(1:end-1);
+averagePeakDistance = mean(peak_dist, 1)/fs;
+peakDistanceStdDev = std(peak_dist)/fs;
+if isempty(averagePeakDistance)
+	averagePeakDistance = 0;
+endif
+if isempty(peakDistanceStdDev)
+	peakDistanceStdDev = 0;
+endif
+averagePeakAmplitude = mean(peakAmplitude, 1);
+peakAmplitudeStdDev = std(peakAmplitude);
+if isempty(peakAmplitudeStdDev)
+	peakAmplitudeStdDev = 0;
+endif
