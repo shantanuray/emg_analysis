@@ -1,15 +1,13 @@
 function emgData = emgSegmentRetrievev2(emgPathName,dataFname,refTags,varargin)
     % emgData = emgSegmentRetrievev2(emgPathName,dataFname,refTags,
-    %            'moving_average_window',100/1000,
     %            'channels',{'bi','tri','trap','ecu'});
     % Steps:
     % - Read MAT file with EMG data
     % - Read CSV with segment information
     % - Segment data
-    % - Filter data (moving average)
     % - Store data in structure 
     p = readInput(varargin);
-    [moving_average_window, channels, min_peak_distance, min_peak_height] = parseInput(p.Results);
+    [channels] = parseInput(p.Results);
     % Init output structure
     emgData = struct([]);
     % Read EMG file
@@ -112,27 +110,14 @@ function emgData = emgSegmentRetrievev2(emgPathName,dataFname,refTags,varargin)
 
     %% Read input
     function p = readInput(input)
-        %   - moving_average_window Default - 100/1000; % 100ms
         %   - channels              Default - {'bi','tri','trap','ecu'}
-        %   - min_peak_distance     Default - 100/1000; % 100ms
-        %   - min_peak_height       Default - 0%
         p = inputParser;
-        moving_average_window = 100/1000;
         channels = {'bi','tri','trap','ecu'};
-        min_peak_distance = 100/1000;
-        min_peak_height = 0.0;
-        
-        addParameter(p,'moving_average_window',moving_average_window, @isnumeric);
         addParameter(p,'channels',channels, @iscell);
-        addParameter(p,'min_peak_distance',min_peak_distance, @isnumeric);
-        addParameter(p,'min_peak_height',min_peak_height, @isnumeric);
         parse(p, input{:});
     end
 
-    function [moving_average_window, channels, min_peak_distance, min_peak_height] = parseInput(p)
-        moving_average_window = p.moving_average_window;
+    function [channels] = parseInput(p)
         channels = p.channels;
-        min_peak_distance = p.min_peak_distance;
-        min_peak_height = p.min_peak_height;
     end
 end
