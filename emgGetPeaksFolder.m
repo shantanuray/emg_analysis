@@ -36,6 +36,7 @@ function [peakData, peakMetrics, peakDistances] = emgGetPeaksFolder(emgData, var
 							% rectify bipolar emg signals
 							data = abs(data);
 							% Moving average filter
+							peakData(i).(channels{j}).(segments{k}).moving_average_window = moving_average_window;
 							data = movingAverage(data, moving_average_window, fs);
 							L = length(data);
 							[pks, idx] = getPeaks(data, fs, 'minPeakDistance', minPeakDistance, 'rmsPctCutoff', rmsPctCutoff);
