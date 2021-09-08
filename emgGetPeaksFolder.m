@@ -28,7 +28,7 @@ function [peakData, peakMetrics, peakDistances] = emgGetPeaksFolder(emgData, var
 			if ~isempty(emgData(i).(channels{j}))
 				for k = 1:length(segments)
 					if isfield(emgData(i).(channels{j}), segments{k})
-						if isfield(emgData(i).(channels{j}).(segments{k}), 'mva')
+						if isfield(emgData(i).(channels{j}).(segments{k}), 'raw')
 							disp(sprintf('Get peaks for %s channel %s segment %s', emgData(i).fileID, channels{j}, segments{k}))
 							fs = emgData(i).(channels{j}).samplingFrequency;
 							data = emgData(i).(channels{j}).(segments{k}).raw;
@@ -43,22 +43,22 @@ function [peakData, peakMetrics, peakDistances] = emgGetPeaksFolder(emgData, var
 							peakData(i).(channels{j}).(segments{k}).minPeakDistance = minPeakDistance;
 							peakData(i).(channels{j}).(segments{k}).rmsPctCutoff = rmsPctCutoff;
 							[pks, idx] = getPeaks(data, fs, 'minPeakDistance', minPeakDistance, 'rmsPctCutoff', rmsPctCutoff);
-							emgData(i).(channels{j}).(segments{k}).peakAmplitude = pks;
-							emgData(i).(channels{j}).(segments{k}).peakLocation = idx;
+							peakData(i).(channels{j}).(segments{k}).peakAmplitude = pks;
+							peakData(i).(channels{j}).(segments{k}).peakLocation = idx;
 							[pk_freq, pk_dist, pk_amp, pk_dist_std, pk_amp_std] = peakAnalysis(idx, pks, fs, L);
-							emgData(i).(channels{j}).(segments{k}).averageFrequency = pk_freq;
-							emgData(i).(channels{j}).(segments{k}).averagePeakDistance = pk_dist;
-							emgData(i).(channels{j}).(segments{k}).averagePeakAmplitude = pk_amp;
-							emgData(i).(channels{j}).(segments{k}).peakDistanceStdDev = pk_dist_std;
-							emgData(i).(channels{j}).(segments{k}).peakAmplitudeStdDev = pk_amp_std;
+							peakData(i).(channels{j}).(segments{k}).averageFrequency = pk_freq;
+							peakData(i).(channels{j}).(segments{k}).averagePeakDistance = pk_dist;
+							peakData(i).(channels{j}).(segments{k}).averagePeakAmplitude = pk_amp;
+							peakData(i).(channels{j}).(segments{k}).peakDistanceStdDev = pk_dist_std;
+							peakData(i).(channels{j}).(segments{k}).peakAmplitudeStdDev = pk_amp_std;
 							peakMetrics(i,j,k,:) = [pk_freq, pk_dist, pk_amp, pk_dist_std, pk_amp_std];
 							peakDistances{j,k} = [peakDistances{j,k};(idx(2:end)-idx(1:end-1))/fs];
 						end
-					endif
-				endfor
-			endif
-		endfor
-	endfor
+					end
+				end
+			end
+		end
+	end
 
 	 %% Read input
     function p = readInput(input)

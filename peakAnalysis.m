@@ -6,12 +6,12 @@ averagePeakDistance = mean(peak_dist, 1)/fs;
 peakDistanceStdDev = std(peak_dist)/fs;
 if isempty(averagePeakDistance)
 	averagePeakDistance = 0;
-endif
+end
 if isempty(peakDistanceStdDev)
 	peakDistanceStdDev = 0;
-endif
+end
 averagePeakAmplitude = mean(peakAmplitude, 1);
 peakAmplitudeStdDev = std(peakAmplitude);
 if isempty(peakAmplitudeStdDev)
 	peakAmplitudeStdDev = 0;
-endif
+end

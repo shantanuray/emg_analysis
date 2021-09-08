@@ -13,7 +13,7 @@ function [peakAmplitude, peakLocation] = getPeaks(data, fs, varargin)
 		[peakAmplitude, peakLocation] = findpeaks(data, 'MinPeakDistance', round(minPeakDistance*fs));
 	else
 		[peakAmplitude, peakLocation] = findpeaks(data, 'MinPeakDistance', round(minPeakDistance*fs), 'MinPeakHeight', rmsPctCutoff*data_rms);		
-	endif
+	end
     %% Read input
     function p = readInput(input)
         %   - minPeakDistance     Default - 100/1000; % 100ms

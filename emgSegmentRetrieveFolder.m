@@ -7,9 +7,6 @@ function [emgDataCNO, emgDataCtrl] = emgSegmentRetrieveFolder(emgPathName)
     % - Filter data (moving average)
     % - Store data in structure
 
-    p = readInput(varargin);
-    [channels] = parseInput(p.Results);
-
 	% Get EMG MAT file names
 	emgFiles = dir(fullfile(emgPathName, '*.mat'));
 	% Get reference tag files
@@ -27,27 +24,14 @@ function [emgDataCNO, emgDataCtrl] = emgSegmentRetrieveFolder(emgPathName)
 	for j = 1:length(emgFiles)
 		dataFname = emgFiles(j).name;
 		disp(['Processing ' emgPathName filesep dataFname])
-		emgData = emgSegmentRetrievev2(emgPathName,dataFname,refTags,
-									   'channels',{'bi','tri','trap','ecu'});
+		emgData = emgSegmentRetrievev2(emgPathName,dataFname,refTags, 'channels',{'bi','tri','trap','ecu'});
 		if emgData.condition == 1
 			cno_count = cno_count + 1;
 			emgDataCNO = [emgDataCNO emgData];
 		else
 			ctrl_count = ctrl_count + 1;
 			emgDataCtrl = [emgDataCtrl emgData];
-		endif
-
-	endfor
-	%% Read input
-	function p = readInput(input)
-	    %   - channels              Default - {'bi','tri','trap','ecu'}
-	    p = inputParser;
-	    channels = {'bi','tri','trap','ecu'};
-	    addParameter(p,'channels',channels, @iscell);
-	    parse(p, input{:});
+		end
 	end
-
-	function [channels] = parseInput(p)
-	    channels = p.channels;
-	end
+	return;
 end

@@ -30,7 +30,7 @@ for f = 1:length(dataFname)
 		error('Could not find tag in reference CSV');
 	else
 		idx = idx(1);
-	endif
+	end
   for chan = 1:length(channels)
     fs =  1/emgRaw.([fileID1, '_', channels{chan}]).interval;
     emgData(f).(channels{chan}).fs =  fs;
@@ -60,7 +60,7 @@ for f = 1:length(dataFname)
     		emgData(f).(channels{chan}).discrete.tag = 'full-discrete';
     	else
     		emgData(f).(channels{chan}).discrete.tag = 'partial-discrete';
-    	endif
+    	end
       	emgData(f).(channels{chan}).discrete.raw = emgData(f).(channels{chan}).raw(1:min(totalSamp, pos2Samp-pos1Samp));
       	% rectify bipolar emg signals
 		emgData(f).(channels{chan}).discrete.rectified = abs(emgData(f).(channels{chan}).discrete.raw);
@@ -69,13 +69,13 @@ for f = 1:length(dataFname)
     else
     	emgData(f).(channels{chan}).discrete.tag = 'no-discrete';
       	emgData(f).(channels{chan}).discrete.raw = [];
-    endif
+    end
     if (~(isnan(pos2Samp) | isnan(pos3Samp))) & (pos3Samp>pos2Samp)
     	if pos2Samp > 0
     		emgData(f).(channels{chan}).rhythmic.tag = 'full-rhythmic';
     	else
     		emgData(f).(channels{chan}).rhythmic.tag = 'partial-rhythmic';
-    	endif
+    	end
       	emgData(f).(channels{chan}).rhythmic.raw = emgData(f).(channels{chan}).raw(pos2Samp-pos1Samp:min(totalSamp, pos3Samp-pos1Samp));
       	% rectify bipolar emg signals
       	emgData(f).(channels{chan}).rhythmic.rectified = abs(emgData(f).(channels{chan}).rhythmic.raw);
@@ -84,10 +84,10 @@ for f = 1:length(dataFname)
     else
     	emgData(f).(channels{chan}).rhythmic.tag = 'no-rhythmic';
       	emgData(f).(channels{chan}).rhythmic.raw = [];
-    endif
-  endfor
+    end
+  end
   save(fullfile(emgPathName, [fileID, '_out.mat']), 'emgData')
-endfor
+end
 
 figure
 subplot(2,1,1)
@@ -126,7 +126,7 @@ minPeakDistance = 100/1000; % 100 ms
 % 	ts2 = ts2(1:length(data_r));
 % 	[pks2, idx2] = findpeaks(data_r, 'MinPeakDistance', round(minPeakDistance*fs));
 % 	plot(ts2, data_r, ts2(idx2), data_r(idx2), 'xm')
-% endfor
+% end
 % hold off
 
 % figure
@@ -151,7 +151,7 @@ minPeakDistance = 100/1000; % 100 ms
 % 	[pks2, idx2] = findpeaks(data_r, 'MinPeakDistance', round(minPeakDistance*fs));
 % 	plot(ts2, data_r, ts2(idx2), data_r(idx2), 'xm')
 % 	title('rhythmic')
-% endfor
+% end
 % hold off
 
 rms_pct = [0.25, 0.35, 0.45];
@@ -197,6 +197,6 @@ for plotNum = 0:length(rms_pct) %:2:length(channels)*2
 		[pks2, idx2] = findpeaks(data_r, 'MinPeakDistance', round(minPeakDistance*fs), 'MinPeakHeight', rms_pct(plotNum)*data_r_rms);
 		plot(ts2, data_r, ts2(idx2), data_r(idx2), 'xm')
 		title(sprintf('rhythmic MinPeakDistance %dms MinPeakHeight %3.2f', round(minPeakDistance*1000), rms_pct(plotNum)*data_r_rms))
-	endif
-endfor
+	end
+end
 hold off

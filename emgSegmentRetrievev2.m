@@ -24,16 +24,16 @@ function emgData = emgSegmentRetrievev2(emgPathName,dataFname,refTags,varargin)
       disp(['Required channels - bi, tri, ecu, trap not found for ' fileID1]);
       for chan = 1:length(channels)
         emgData(1).(channels{chan}) = struct();
-      endfor
+      end
       return;
-    endif
+    end
     for chan = 1:length(channels)
       fs =  1/emgRaw.([fileID1, '_', channels{chan}]).interval;
       emgData(1).(channels{chan}).fileID =  fileID;
       emgData(1).(channels{chan}).samplingFrequency =  fs;
       emgData(1).(channels{chan}).offset =  emgRaw.([fileID1, '_', channels{chan}]).offset;
       emgData(1).(channels{chan}).raw =  emgRaw.([fileID1, '_', channels{chan}]).values;
-    endfor
+    end
     % Compare to reference CFL tag file
     idx = find(~cellfun(@isempty, strfind(refTags{1,1}, fileID)));
     % TODO: If multiple matches, then what?
@@ -57,19 +57,19 @@ function emgData = emgSegmentRetrievev2(emgPathName,dataFname,refTags,varargin)
           emgData(1).tag = 'full-discrete';
         else
           emgData(1).tag = 'partial-discrete';
-        endif
+        end
       else
         emgData(1).tag = 'no-discrete';
-      endif
+      end
       if (~(isnan(pos2Samp) | isnan(pos3Samp))) & (pos3Samp>pos2Samp)
         if pos2Samp > 0
           emgData(1).tag = [emgData(1).tag, '-', 'full-rhythmic'];
         else
           emgData(1).tag = [emgData(1).tag, '-', 'partial-rhythmic'];
-        endif
+        end
       else
         emgData(1).tag = [emgData(1).tag, '-', 'no-rhythmic'];
-      endif
+      end
       
       for chan = 1:length(channels)
         fs =  1/emgRaw.([fileID1, '_', channels{chan}]).interval;
@@ -88,25 +88,25 @@ function emgData = emgSegmentRetrievev2(emgPathName,dataFname,refTags,varargin)
             emgData(1).(channels{chan}).discrete.tag = 'full-discrete';
           else
             emgData(1).(channels{chan}).discrete.tag = 'partial-discrete';
-          endif
+          end
           emgData(1).(channels{chan}).discrete.raw = emgData(1).(channels{chan}).raw(1:min(totalSamp, pos2Samp));
         else
           emgData(1).(channels{chan}).discrete.tag = 'no-discrete';
           emgData(1).(channels{chan}).discrete.raw = [];
-        endif
+        end
         if (~(isnan(pos2Samp) | isnan(pos3Samp))) & (pos3Samp>pos2Samp)
           if pos2Samp > 0
             emgData(1).(channels{chan}).rhythmic.tag = 'full-rhythmic';
           else
             emgData(1).(channels{chan}).rhythmic.tag = 'partial-rhythmic';
-          endif
+          end
           emgData(1).(channels{chan}).rhythmic.raw = emgData(1).(channels{chan}).raw(pos2Samp:min(totalSamp, pos3Samp));
         else
           emgData(1).(channels{chan}).rhythmic.tag = 'no-rhythmic';
           emgData(1).(channels{chan}).rhythmic.raw = [];
-        endif
-      endfor
-    endif
+        end
+      end
+    end
 
     %% Read input
     function p = readInput(input)
