@@ -1,11 +1,14 @@
-function [emgDataCNO, emgDataCtrl] = emgSegmentRetrieveFolder(emgPathName)
-    % [emgDataCNO, emgDataCtrl] = emgSegmentRetrieveFolder(emgPathName);
+function [emgDataCNO, emgDataCtrl] = emgSegmentRetrieveFolder(emgPathName, varargin)
+    % [emgDataCNO, emgDataCtrl] = emgSegmentRetrieveFolder(emgPathName, 'channels', {'bi','tri','trap','ecu'});
     % Steps:
     % - Read all MAT files in the folder with EMG data
     % - Read CSV with segment information
     % - Segment data
     % - Filter data (moving average)
     % - Store data in structure
+
+    p = readInput(varargin);
+    [channels] = parseInput(p.Results);
 
 	% Get EMG MAT file names
 	emgFiles = dir(fullfile(emgPathName, '*.mat'));
@@ -15,8 +18,9 @@ function [emgDataCNO, emgDataCtrl] = emgSegmentRetrieveFolder(emgPathName)
 	refFile = refFiles(1).name;
 	% Read reference tag CSV
 	% Assumption: No header and replace by NaN
-	[fileid, condition, time_post_cno, pos1, pos2, pos3, pulling_bout] = textread(fullfile(emgPathName,refFile), '%s %d %d %f %f %f %d', 'delimiter' , ',');
-	refTags = {fileid, condition, time_post_cno, pos1, pos2, pos3, pulling_bout};
+	fid = fopen(fullfile(emgPathName,refFile), 'r');
+	refTags = textscan(fid, '%s%d%d%f%f%f%d', 'delimiter' , ',');
+	fclose(fid);
 	cno_count = 0;
 	ctrl_count = 0;
 	emgDataCNO = [];
@@ -24,7 +28,7 @@ function [emgDataCNO, emgDataCtrl] = emgSegmentRetrieveFolder(emgPathName)
 	for j = 1:length(emgFiles)
 		dataFname = emgFiles(j).name;
 		disp(['Processing ' emgPathName filesep dataFname])
-		emgData = emgSegmentRetrievev2(emgPathName,dataFname,refTags, 'channels',{'bi','tri','trap','ecu'});
+		emgData = emgSegmentRetrievev2(emgPathName,dataFname,refTags, 'channels',channels);
 		if emgData.condition == 1
 			cno_count = cno_count + 1;
 			emgDataCNO = [emgDataCNO emgData];
@@ -34,4 +38,17 @@ function [emgDataCNO, emgDataCtrl] = emgSegmentRetrieveFolder(emgPathName)
 		end
 	end
 	return;
+
+	%% Read input
+	function p = readInput(input)
+	    %   - channels              Default - {'bi','tri','trap','ecu'}
+	    p = inputParser;
+	    channels = {'bi','tri','trap','ecu'};
+	    addParameter(p,'channels',channels, @iscell);
+	    parse(p, input{:});
+	end
+
+	function [channels] = parseInput(p)
+	    channels = p.channels;
+	end
 end

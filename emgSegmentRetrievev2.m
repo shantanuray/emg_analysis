@@ -20,6 +20,7 @@ function emgData = emgSegmentRetrievev2(emgPathName,dataFname,refTags,varargin)
     emgRaw = load(emgFile);
     emgData(1).fileID = fileID;
     emgData(1).tag = '';
+    emgData(1).condition = '';
     if ~isfield(emgRaw, [fileID1, '_', channels{1}])
       disp(['Required channels - bi, tri, ecu, trap not found for ' fileID1]);
       for chan = 1:length(channels)
@@ -43,6 +44,9 @@ function emgData = emgSegmentRetrievev2(emgPathName,dataFname,refTags,varargin)
     else
       idx = idx(1);
       disp(['Found match', refTags{1,1}{idx}])
+      % Col 2 -> condition true - cno or false - control
+      emgData(1).condition = refTags{1,2}(idx); 
+
       % Extract rhythmic and discrete timestamps
       pos1 = refTags{1,4}(idx); % 4 -> pos1
       pos2 = refTags{1,5}(idx); % 5 -> pos2
@@ -73,7 +77,6 @@ function emgData = emgSegmentRetrievev2(emgPathName,dataFname,refTags,varargin)
       
       for chan = 1:length(channels)
         fs =  1/emgRaw.([fileID1, '_', channels{chan}]).interval;
-        emgData(1).(channels{chan}).conditon = refTags{1,2}(idx); % Col 2 -> conditon true - cno or false - control
         emgData(1).(channels{chan}).timePostCNO = refTags{1,3}(idx); % 3->time post CNO
         emgData(1).(channels{chan}).pos1 = pos1;
         emgData(1).(channels{chan}).pos2 = pos2;
