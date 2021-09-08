@@ -1,10 +1,9 @@
-function [emgDataCNO, emgDataCtrl] = emgSegmentRetrieveFolder(emgPathName, varargin)
-    % [emgDataCNO, emgDataCtrl] = emgSegmentRetrieveFolder(emgPathName, 'channels', {'bi','tri','trap','ecu'});
+function [emgDataCNO, emgDataCtrl] = emgSegmentRetrieveFolder(emgPathName, refFile, varargin)
+    % [emgDataCNO, emgDataCtrl] = emgSegmentRetrieveFolder(emgPathName, refFile, 'channels', {'bi','tri','trap','ecu'});
     % Steps:
     % - Read all MAT files in the folder with EMG data
-    % - Read CSV with segment information
+    % - Read refFile - CSV with segment information
     % - Segment data
-    % - Filter data (moving average)
     % - Store data in structure
 
     p = readInput(varargin);
@@ -12,10 +11,6 @@ function [emgDataCNO, emgDataCtrl] = emgSegmentRetrieveFolder(emgPathName, varar
 
 	% Get EMG MAT file names
 	emgFiles = dir(fullfile(emgPathName, '*.mat'));
-	% Get reference tag files
-	refFiles = dir(fullfile(emgPathName, '*.csv'));
-	% There should be only one csv; Pick top
-	refFile = refFiles(1).name;
 	% Read reference tag CSV
 	% Assumption: No header and replace by NaN
 	fid = fopen(fullfile(emgPathName,refFile), 'r');
@@ -32,7 +27,7 @@ function [emgDataCNO, emgDataCtrl] = emgSegmentRetrieveFolder(emgPathName, varar
 		if emgData.condition == 1
 			cno_count = cno_count + 1;
 			emgDataCNO = [emgDataCNO emgData];
-		else
+		elseif emgData.condition == 0
 			ctrl_count = ctrl_count + 1;
 			emgDataCtrl = [emgDataCtrl emgData];
 		end
