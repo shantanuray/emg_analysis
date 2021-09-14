@@ -27,5 +27,5 @@ flattenEMGPeakAnalysis(JFL2_CNO_Peaks, 'JFL2', 'CNO');
 flattenEMGPeakAnalysis(JFL2_Ctrl_Peaks, 'JFL2', 'Control');
 
 plotPeakDistHistogram('CFL4', {CFL4_Ctrl_peak_dist, CFL4_CNO_peak_dist}, 'rhythmic', 0:0.025:0.9);
-plotPeakDistHistogram('CFL5', {CFL5_Ctrl_peak_dist, CFL5_CNO_peak_dist}, 'rhythmic');
-plotPeakDistHistogram('JFL2', {JFL2_Ctrl_peak_dist, JFL2_CNO_peak_dist}, 'rhythmic');
+plotPeakDistHistogram('CFL5', {CFL5_Ctrl_peak_dist, CFL5_CNO_peak_dist}, 'rhythmic', 0:0.025:0.9);
+plotPeakDistHistogram('JFL2', {JFL2_Ctrl_peak_dist, JFL2_CNO_peak_dist}, 'rhythmic', 0:0.025:0.9);
