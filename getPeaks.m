@@ -7,18 +7,18 @@ function [peakAmplitude, peakLocation] = getPeaks(data, fs, varargin)
 	p = readInput(varargin);
     [minPeakDistance, rmsPctCutoff] = parseInput(p.Results);
 
-	if isnan(rmsPctCutoff)
-        if length(data) < round(minPeakDistance*fs)
+	if rmsPctCutoff == -Inf | isnan(rmsPctCutoff) | isempty(rmsPctCutoff)
+        if length(data) < ceil(minPeakDistance*fs)*2
             [peakAmplitude, peakLocation] = findpeaks(data);
         else
-		  [peakAmplitude, peakLocation] = findpeaks(data, 'MinPeakDistance', round(minPeakDistance*fs));
+		    [peakAmplitude, peakLocation] = findpeaks(data, 'MinPeakDistance', round(minPeakDistance*fs));
         end
 	else
         data_rms = rms(data);
-        if length(data) < round(minPeakDistance*fs)
+        if length(data) < ceil(minPeakDistance*fs)*2
             [peakAmplitude, peakLocation] = findpeaks(data, 'MinPeakHeight', rmsPctCutoff*data_rms);
         else
-          [peakAmplitude, peakLocation] = findpeaks(data, 'MinPeakDistance', round(minPeakDistance*fs), 'MinPeakHeight', rmsPctCutoff*data_rms);
+            [peakAmplitude, peakLocation] = findpeaks(data, 'MinPeakDistance', round(minPeakDistance*fs), 'MinPeakHeight', rmsPctCutoff*data_rms);
         end
 	end
     return;
@@ -26,10 +26,10 @@ function [peakAmplitude, peakLocation] = getPeaks(data, fs, varargin)
     %% Read input
     function p = readInput(input)
         %   - minPeakDistance     Default - 100/1000; % 100ms
-        %   - rmsPctCutoff        Default - NaN (skip this filter)
+        %   - rmsPctCutoff        Default - -Inf (skip this filter)
         p = inputParser;
         minPeakDistance = 100/1000;
-        rmsPctCutoff = NaN;
+        rmsPctCutoff = -Inf;
 
         addParameter(p,'minPeakDistance',minPeakDistance, @isnumeric);
         addParameter(p,'rmsPctCutoff',rmsPctCutoff, @isnumeric);
