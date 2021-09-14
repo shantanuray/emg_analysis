@@ -1,4 +1,4 @@
-
+% RMS cut-off check
 rms_pct = [0.25, 0.35, 0.45];
 figure
 hold on
@@ -43,3 +43,27 @@ for plotNum = 0:length(rms_pct) %:2:length(channels)*2
 	end
 end
 hold off
+
+% Histogram plots
+channels = {'bi','tri','trap','ecu'};
+segments = {'discrete', 'rhythmic'};
+condition = {'CNO', 'Control'};
+figure;hold on;
+for j = 1:length(channels)
+	for k = 1:length(segments)
+		subplot(length(channels), length(segments), (j-1)*2+k)
+		histogram(CFL4_Ctrl_peak_dist{j,k})
+		title([condition{2}  '::', channels{j}, '::', segments{k}])
+	end
+end
+hold off;
+figure;hold on;
+for j = 1:length(channels)
+	for k = 1:length(segments)
+		subplot(length(channels), length(segments), (j-1)*2+k)
+		histogram(CFL4_CNO_peak_dist{j,k})
+		title([condition{1}  '::', channels{j}, '::', segments{k}])
+	end
+end
+hold off;
+
