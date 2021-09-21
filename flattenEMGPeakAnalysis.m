@@ -46,28 +46,37 @@ function peakDataFlat = flattenEMGPeakAnalysis(peakData, animal, condition, vara
 					fs = peakData(i).(channels{j}).samplingFrequency;
 					idx = peakData(i).(channels{j}).(segments{k}).peakLocation;
 					peak_dist = (idx(2:end) - idx(1:end-1))/fs;
+					peak_amp = peakData(i).(channels{j}).(segments{k}).peakAmplitude;
 					peakDataFlat{counter, 9} = peakData(i).(channels{j}).(segments{k}).averageFrequency;
 					peakDataFlat{counter, 10} = peakData(i).(channels{j}).(segments{k}).averagePeakDistance;
 					peakDataFlat{counter, 11} = peakData(i).(channels{j}).(segments{k}).peakDistanceStdDev;
 					peakDataFlat{counter, 12} = peakData(i).(channels{j}).(segments{k}).averagePeakAmplitude;
 					peakDataFlat{counter, 13} = peakData(i).(channels{j}).(segments{k}).peakAmplitudeStdDev;
 					peakDataFlat{counter, 14} = peak_dist';
+					peakDataFlat{counter, 15} = peak_amp';
 				end
 			end
 		end
 	end
 	
 	% Write to table
-	peakDataTable = cell2table(peakDataFlat);
+	peakDistTable = cell2table(peakDataFlat(:, 1:14));
+	peakAmplTable = cell2table(peakDataFlat(:, [1:13, 15]));
 	% Standardize column names
-	colnames = peakDataTable.Properties.VariableNames;
+	colnames_d = peakDistTable.Properties.VariableNames;
+	colnames_a = peakAmplTable.Properties.VariableNames;
 	actcolnames = {'Animal', 'FileID', 'Condition', 'Tag', 'Time Post CNO', 'Pulling Bout', 'Channel', 'Segment', 'Average Peak Frequency', 'Average Peak Distance', 'Std Dev Peak Distance', 'Average Peak Amplitude', 'Std Dev Peak Amplitude'};
 	for c=1:13
-		colnames{1,c} = actcolnames{c};
+		colnames_d{1,c} = actcolnames{c};
+		colnames_a{1,c} = actcolnames{c};
 	end
-	peakDataTable.Properties.VariableNames = colnames;
+	colnames_d{1,14} = 'peak_dist';
+	colnames_a{1,14} = 'peak_ampl';
+	peakDistTable.Properties.VariableNames = colnames_d;
+	peakAmplTable.Properties.VariableNames = colnames_a;
 	% Write to file
-	writetable(peakDataTable, [animal, '_', condition, '_peak_analysis.csv'])
+	writetable(peakDistTable, [animal, '_', condition, '_peak_dist.csv'])
+	writetable(peakAmplTable, [animal, '_', condition, '_peak_amp.csv'])
 
 	function c = empty2nan(c)
 	  c(cellfun(@isempty, c)) = {nan};

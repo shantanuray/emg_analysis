@@ -8,6 +8,11 @@ save CFL5.mat CFL5_CNO CFL5_Ctrl
 save CFL4.mat CFL4_CNO CFL4_Ctrl
 save JFL2.mat JFL2_CNO JFL2_Ctrl
 
+d_dr = "D:\U19\mat";
+load(fullfile(d_dr, 'CFL5.mat'))
+load(fullfile(d_dr, 'CFL4.mat'))
+load(fullfile(d_dr, 'JFL2.mat'))
+
 [CFL4_CNO_Peaks, CFL4_CNO_m, CFL4_CNO_peak_dist] = emgGetPeaksFolder(CFL4_CNO);
 [CFL4_Ctrl_Peaks, CFL4_Ctrl_m, CFL4_Ctrl_peak_dist] = emgGetPeaksFolder(CFL4_Ctrl);
 
