@@ -17,7 +17,7 @@ function emg_moving_average = movingAverage(emg_signal, window_duration, samplin
 % hold on
 % plot(t,y)
 % legend('Input Data','Filtered Data')
-windowSize = round(window_duration*sampling_frequency, 0);
+windowSize = round(window_duration*sampling_frequency);
 b = (1/windowSize)*ones(1,windowSize);
 a = 1;
 if nargin<4
