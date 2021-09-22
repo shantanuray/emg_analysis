@@ -9,9 +9,9 @@ save CFL4.mat CFL4_CNO CFL4_Ctrl
 save JFL2.mat JFL2_CNO JFL2_Ctrl
 
 d_dr = "D:\U19\mat";
-load(fullfile(d_dr, 'CFL5.mat'))
-load(fullfile(d_dr, 'CFL4.mat'))
-load(fullfile(d_dr, 'JFL2.mat'))
+load('CFL5.mat')
+load('CFL4.mat')
+load('JFL2.mat')
 
 [CFL4_CNO_Peaks, CFL4_CNO_m, CFL4_CNO_peak_dist] = emgGetPeaksFolder(CFL4_CNO);
 [CFL4_Ctrl_Peaks, CFL4_Ctrl_m, CFL4_Ctrl_peak_dist] = emgGetPeaksFolder(CFL4_Ctrl);
@@ -58,4 +58,4 @@ segments = {'discrete', 'rhythmic'};
 animal = 'CFL4';
 CFL4_KM_Flat = [flattenKMData(CFL4_KM_CNO, keypoints, fps, condition, segments); ...
 				flattenKMData(CFL4_KM_Ctrl, keypoints, fps, condition, segments)];
-writetable(CFL4_KM_Flat, [animal, '_kinematic.csv']);
+writetable(struct2table(CFL4_KM_Flat), [animal, '_kinematic.csv']);
