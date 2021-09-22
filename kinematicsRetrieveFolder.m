@@ -33,7 +33,7 @@ function [kmDataCNO, kmDataCtrl, keypoints] = kinematicsRetrieveFolder(kmPath,re
         header = fgetl(fid);
         header = strsplit(header, ',');
     else
-        header = {'file name', 'condition', 'time post CNO', 'pos1', 'pos2', 'pos3', 'pulling bout'};
+        header = {'file name', 'condition', 'time post CNO', '1', '2', '3', 'pulling bout'};
     end
     refTags = textscan(fid, '%s%d%d%f%f%f%d', 'delimiter' , ',');
     fclose(fid);
