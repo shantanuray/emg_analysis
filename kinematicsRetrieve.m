@@ -52,7 +52,7 @@ function [kmData, keypoints] = kinematicsRetrieve(kmFname,refTags,row,header,fps
     pos2Samp = round(fps*kmData.pos2) + 1;
     pos3Samp = floor(fps*kmData.pos3) + 1;
     if (~(isnan(pos1Samp) | isnan(pos2Samp))) & (pos2Samp>pos1Samp)
-        if pos1Samp > 0
+        if kmData.pos1 > 0
             kmData.tag = 'full-discrete';
         else
             kmData.tag = 'partial-discrete';
@@ -61,7 +61,7 @@ function [kmData, keypoints] = kinematicsRetrieve(kmFname,refTags,row,header,fps
         kmData.tag = 'no-discrete';
     end
     if (~(isnan(pos2Samp) | isnan(pos3Samp))) & (pos3Samp>pos2Samp)
-        if pos2Samp > 0
+        if kmData.pos2 > 0
             kmData.tag = [kmData.tag, '-', 'full-rhythmic'];
         else
             kmData.tag = [kmData.tag, '-', 'partial-rhythmic'];
@@ -103,22 +103,24 @@ function [kmData, keypoints] = kinematicsRetrieve(kmFname,refTags,row,header,fps
         kmData.raw = [keypoint_data{2:end}];
         for kp = 1:length(keypoints)
             for mt = 1:length(metafields)
-                kmData.(keypoints{kp}).(metafields{mt}) = kmData.raw(:,(kp-1)*length(metafields)+mt);
+                data = kmData.raw(:,(kp-1)*length(metafields)+mt);
+                data = returnNonZero(data);
+                kmData.(keypoints{kp}).(metafields{mt}) = data;
             end
         end
     end
     if ~isempty(kmData.raw)
         for kp = 1:length(keypoints)
             % pos1, pos2 and pos3 are wrt  the raw timeline
-            totalSamp = length(kmData.raw);
             % data start = 0 samp
             if (~(isnan(pos1Samp) | isnan(pos2Samp))) & (pos2Samp>pos1Samp)
-                if pos1Samp > 0
+                if kmData.pos1 > 0
                     kmData.(keypoints{kp}).discrete.tag = 'full-discrete';
                 else
                     kmData.(keypoints{kp}).discrete.tag = 'partial-discrete';
                 end
                 for mt = 1:length(metafields)
+                    totalSamp = length(kmData.(keypoints{kp}).(metafields{mt}));
                     kmData.(keypoints{kp}).discrete.(metafields{mt}) = kmData.(keypoints{kp}).(metafields{mt})(1:min(totalSamp, pos2Samp));
                 end
             else
@@ -128,12 +130,13 @@ function [kmData, keypoints] = kinematicsRetrieve(kmFname,refTags,row,header,fps
                 end
             end
             if (~(isnan(pos2Samp) | isnan(pos3Samp))) & (pos3Samp>pos2Samp)
-                if pos2Samp > 0
+                if kmData.pos2 > 0
                     kmData.(keypoints{kp}).rhythmic.tag = 'full-rhythmic';
                 else
                     kmData.(keypoints{kp}).rhythmic.tag = 'partial-rhythmic';
                 end
                 for mt = 1:length(metafields)
+                    totalSamp = length(kmData.(keypoints{kp}).(metafields{mt}));
                     kmData.(keypoints{kp}).rhythmic.(metafields{mt}) = kmData.(keypoints{kp}).(metafields{mt})(pos2Samp:min(totalSamp, pos3Samp));
                 end
             else

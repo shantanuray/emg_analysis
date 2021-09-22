@@ -57,7 +57,7 @@ function emgData = emgSegmentRetrievev2(emgPathName,dataFname,refTags,varargin)
       pos2Samp = round(fs*pos2) + 1;
       pos3Samp = floor(fs*pos3) + 1;
       if (~(isnan(pos1Samp) | isnan(pos2Samp))) & (pos2Samp>pos1Samp)
-        if pos1Samp > 0
+        if pos1 > 0
           emgData(1).tag = 'full-discrete';
         else
           emgData(1).tag = 'partial-discrete';
@@ -66,7 +66,7 @@ function emgData = emgSegmentRetrievev2(emgPathName,dataFname,refTags,varargin)
         emgData(1).tag = 'no-discrete';
       end
       if (~(isnan(pos2Samp) | isnan(pos3Samp))) & (pos3Samp>pos2Samp)
-        if pos2Samp > 0
+        if pos2 > 0
           emgData(1).tag = [emgData(1).tag, '-', 'full-rhythmic'];
         else
           emgData(1).tag = [emgData(1).tag, '-', 'partial-rhythmic'];
@@ -87,7 +87,7 @@ function emgData = emgSegmentRetrievev2(emgPathName,dataFname,refTags,varargin)
         totalSamp = length(emgData(1).(channels{chan}).raw);
         % the emg data start = 0
         if (~(isnan(pos1Samp) | isnan(pos2Samp))) & (pos2Samp>pos1Samp)
-          if pos1Samp > 0
+          if pos1 > 0
             emgData(1).(channels{chan}).discrete.tag = 'full-discrete';
           else
             emgData(1).(channels{chan}).discrete.tag = 'partial-discrete';
@@ -98,7 +98,7 @@ function emgData = emgSegmentRetrievev2(emgPathName,dataFname,refTags,varargin)
           emgData(1).(channels{chan}).discrete.raw = [];
         end
         if (~(isnan(pos2Samp) | isnan(pos3Samp))) & (pos3Samp>pos2Samp)
-          if pos2Samp > 0
+          if pos2 > 0
             emgData(1).(channels{chan}).rhythmic.tag = 'full-rhythmic';
           else
             emgData(1).(channels{chan}).rhythmic.tag = 'partial-rhythmic';
