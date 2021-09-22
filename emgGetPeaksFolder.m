@@ -72,7 +72,7 @@ function [peakData, peakMetrics, peakDistances] = emgGetPeaksFolder(emgData, var
 								% Get peaks
 								peakData(i).(channels{j}).(segments{k}).minPeakDistance = minPeakDistance;
 								peakData(i).(channels{j}).(segments{k}).rmsPctCutoff = rmsPctCutoff;
-								[pks, idx] = getPeaks(data, fs, 'minPeakDistance', minPeakDistance, 'rmsPctCutoff', rmsPctCutoff);
+								[pks, idx] = emgGetPeaks(data, fs, 'minPeakDistance', minPeakDistance, 'rmsPctCutoff', rmsPctCutoff);
 								peakData(i).(channels{j}).(segments{k}).peakAmplitude = pks;
 								peakData(i).(channels{j}).(segments{k}).peakLocation = idx;
 								[pk_freq, pk_dist, pk_amp, pk_dist_std, pk_amp_std] = peakAnalysis(idx, pks, fs, L);
