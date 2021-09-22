@@ -1,4 +1,4 @@
-function [emgDataCNO, emgDataCtrl] = emgSegmentRetrieveFolder(emgPathName, refFile, varargin)
+function [emgDataCNO, emgDataCtrl, header] = emgSegmentRetrieveFolder(emgPathName, refFile, varargin)
     % [emgDataCNO, emgDataCtrl] = emgSegmentRetrieveFolder(emgPathName, refFile, 'channels', {'bi','tri','trap','ecu'});
     % Steps:
     % - Read all MAT files in the folder with EMG data
