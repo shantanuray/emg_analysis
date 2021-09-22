@@ -1,5 +1,5 @@
-function [peakAmplitude, peakLocation] = getPeaks(data, fs, varargin)
-% [peakAmplitude, peakLocation] = getPeaks(data, fs,
+function [peakAmplitude, peakLocation] = emgGetPeaks(data, fs, varargin)
+% [peakAmplitude, peakLocation] = emgGetPeaks(data, fs,
 %            			                   'minPeakDistance', 100/1000,
 %            			                   'rmsPctCutoff', 0.25);
 % Wrapper around find_peaks.m
