@@ -34,3 +34,28 @@ flattenEMGPeakAnalysis(JFL2_Ctrl_Peaks, 'JFL2', 'Control');
 plotPeakDistHistogram('CFL4', {CFL4_Ctrl_peak_dist, CFL4_CNO_peak_dist}, 'rhythmic', 0:0.025:0.9);
 plotPeakDistHistogram('CFL5', {CFL5_Ctrl_peak_dist, CFL5_CNO_peak_dist}, 'rhythmic', 0:0.025:0.9);
 plotPeakDistHistogram('JFL2', {JFL2_Ctrl_peak_dist, JFL2_CNO_peak_dist}, 'rhythmic', 0:0.025:0.9);
+
+km_dir = 'C:\Users\shantanu.ray\Downloads\ffmpeg_ts_200fps\ffmpeg_ts_200fps';
+ref_file = 'C:\Users\shantanu.ray\Downloads\CFL_data_4.csv';
+fps = 200;
+[CFL4_KM_CNO, CFL4_KM_Ctrl, keypoints] = kinematicsRetrieveFolder(km_dir, ...
+													   		   	  ref_file, ...
+													   		   	  fps);
+
+for d = 1:length(CFL4_KM_CNO)
+	CFL4_KM_CNO(d) = kinematicsProcessor(CFL4_KM_CNO(d), ...
+										 keypoints, fps);
+end;
+for d = 1:length(CFL4_KM_Ctrl)
+	CFL4_KM_Ctrl(d) = kinematicsProcessor(CFL4_KM_Ctrl(d), ...
+										 keypoints, fps);
+end;
+
+save CFL4_KM_Data.mat CFL4_KM_CNO CFL4_KM_Ctrl;
+
+condition = {'Control', 'CNO'};
+segments = {'discrete', 'rhythmic'};
+animal = 'CFL4';
+CFL4_KM_Flat = [flattenKMData(CFL4_KM_CNO, keypoints, fps, condition, segments); ...
+				flattenKMData(CFL4_KM_Ctrl, keypoints, fps, condition, segments)];
+writetable(CFL4_KM_Flat, [animal, '_kinematic.csv']);
