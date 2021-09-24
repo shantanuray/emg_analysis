@@ -24,9 +24,9 @@ function [peakData, peakMetrics, peakDistances] = emgGetPeaksFolder(emgData, var
     peakData = emgData;
     fs = NaN;
     while isnan(fs) | isempty(fs)
-    	for i = 1:length(emgData)
-    		for j = 1:length(channels)
-    			fs = emgData(i).(channels{j}).samplingFrequency;
+    	for row = 1:length(emgData)
+    		for chan = 1:length(channels)
+    			fs = emgData(row).(channels{chan}).samplingFrequency;
     		end
     	end
     end
@@ -40,49 +40,50 @@ function [peakData, peakMetrics, peakDistances] = emgGetPeaksFolder(emgData, var
     end
 
 
-	for i = 1:length(emgData)
-		for j = 1:length(channels)
-			peakData(i).(channels{j}) = rmfield(peakData(i).(channels{j}), 'raw');
-			if ~isempty(emgData(i).(channels{j}))
-				for k = 1:length(segments)
-					if isfield(emgData(i).(channels{j}), segments{k})
-						if isfield(emgData(i).(channels{j}).(segments{k}), 'raw')
-							disp(sprintf('Get peaks for %s channel %s segment %s', emgData(i).fileID, channels{j}, segments{k}))
-							fs = emgData(i).(channels{j}).samplingFrequency;
-							data = emgData(i).(channels{j}).(segments{k}).raw;
-							peakData(i).(channels{j}).(segments{k}) = rmfield(peakData(i).(channels{j}).(segments{k}), 'raw');
+	for row = 1:length(emgData)
+		for chan = 1:length(channels)
+			peakData(row).(channels{chan}) = rmfield(peakData(row).(channels{chan}), 'raw');
+			if ~isempty(emgData(row).(channels{chan}))
+				for seg = 1:length(segments)
+					if isfield(emgData(row).(channels{chan}), segments{seg})
+						if isfield(emgData(row).(channels{chan}).(segments{seg}), 'raw')
+							disp(sprintf('Get peaks for %s channel %s segment %s', emgData(row).fileID, channels{chan}, segments{seg}))
+							fs = emgData(row).(channels{chan}).samplingFrequency;
+							data = emgData(row).(channels{chan}).(segments{seg}).raw;
+							peakData(row).(channels{chan}).(segments{seg}) = rmfield(peakData(row).(channels{chan}).(segments{seg}), 'raw');
 							if ~isempty(data)
 								% if IIR filter, high pass 50hz before rectification
 								if filterType=='iir'
 									data = filter(hiFilt,data);
-									peakData(i).(channels{j}).(segments{k}).HiPassBand = passbandFrequency(1);
+									peakData(row).(channels{chan}).(segments{seg}).HiPassBand = passbandFrequency(1);
 								end
 								% rectify bipolar emg signals
 								data = abs(data);
 								if filterType=='mva'
 									% Moving average filter
-									peakData(i).(channels{j}).(segments{k}).movingAverageWindow = movingAverageWindow;
+									peakData(row).(channels{chan}).(segments{seg}).movingAverageWindow = movingAverageWindow;
 									data = movingAverage(data, movingAverageWindow, fs);
 								elseif filterType=='iir'
 									% if IIR filter, low pass 30hz after rectification
 									data = filter(loFilt,data);
-									peakData(i).(channels{j}).(segments{k}).HiPassBand = passbandFrequency(2);
+									peakData(row).(channels{chan}).(segments{seg}).HiPassBand = passbandFrequency(2);
 								end
 								L = length(data);
 								% Get peaks
-								peakData(i).(channels{j}).(segments{k}).minPeakDistance = minPeakDistance;
-								peakData(i).(channels{j}).(segments{k}).rmsPctCutoff = rmsPctCutoff;
+								peakData(row).(channels{chan}).(segments{seg}).minPeakDistance = minPeakDistance;
+								peakData(row).(channels{chan}).(segments{seg}).rmsPctCutoff = rmsPctCutoff;
 								[pks, idx] = emgGetPeaks(data, fs, 'minPeakDistance', minPeakDistance, 'rmsPctCutoff', rmsPctCutoff);
-								peakData(i).(channels{j}).(segments{k}).peakAmplitude = pks;
-								peakData(i).(channels{j}).(segments{k}).peakLocation = idx;
+								peakData(row).(channels{chan}).(segments{seg}).peakAmplitude = pks;
+								peakData(row).(channels{chan}).(segments{seg}).peakLocation = idx;
+								peakData(row).(channels{chan}).(segments{seg}).peakTime = idx/fs;
 								[pk_freq, pk_dist, pk_amp, pk_dist_std, pk_amp_std] = peakAnalysis(idx, pks, fs, L);
-								peakData(i).(channels{j}).(segments{k}).averageFrequency = pk_freq;
-								peakData(i).(channels{j}).(segments{k}).averagePeakDistance = pk_dist;
-								peakData(i).(channels{j}).(segments{k}).averagePeakAmplitude = pk_amp;
-								peakData(i).(channels{j}).(segments{k}).peakDistanceStdDev = pk_dist_std;
-								peakData(i).(channels{j}).(segments{k}).peakAmplitudeStdDev = pk_amp_std;
-								peakMetrics(i,j,k,:) = [pk_freq, pk_dist, pk_amp, pk_dist_std, pk_amp_std];
-								peakDistances{j,k} = [peakDistances{j,k};(idx(2:end)-idx(1:end-1))/fs];
+								peakData(row).(channels{chan}).(segments{seg}).averageFrequency = pk_freq;
+								peakData(row).(channels{chan}).(segments{seg}).averagePeakDistance = pk_dist;
+								peakData(row).(channels{chan}).(segments{seg}).averagePeakAmplitude = pk_amp;
+								peakData(row).(channels{chan}).(segments{seg}).peakDistanceStdDev = pk_dist_std;
+								peakData(row).(channels{chan}).(segments{seg}).peakAmplitudeStdDev = pk_amp_std;
+								peakMetrics(row,chan,seg,:) = [pk_freq, pk_dist, pk_amp, pk_dist_std, pk_amp_std];
+								peakDistances{chan,seg} = [peakDistances{chan,seg};(idx(2:end)-idx(1:end-1))/fs];
 							end
 						end
 					end
