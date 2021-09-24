@@ -7,28 +7,30 @@ function [emgDataCNO, emgDataCtrl, header] = emgSegmentRetrieveFolder(emgPathNam
     % - Store data in structure
 
     p = readInput(varargin);
-    [channels] = parseInput(p.Results);
+    [channels,refFileHeader] = parseInput(p.Results);
 
 	% Get EMG MAT file names
 	emgFiles = dir(fullfile(emgPathName, '*.mat'));
 	% Read reference tag CSV
 	% Assumption: No header and replace by NaN
 	fid = fopen(fullfile(emgPathName,refFile), 'r');
-	refTags = textscan(fid, '%s%d%d%f%f%f%d', 'delimiter' , ',');
-	fclose(fid);
-	cno_count = 0;
-	ctrl_count = 0;
+	if refFileHeader
+        header = fgetl(fid);
+        header = strsplit(header, ',');
+    else
+        header = {'file name', 'condition', 'time post CNO', '1', '2', '3', 'pulling bout'};
+    end
+    refTags = textscan(fid, '%s%d%d%f%f%f%d', 'delimiter' , ',');
+    fclose(fid);
 	emgDataCNO = [];
 	emgDataCtrl = [];
 	for j = 1:length(emgFiles)
 		dataFname = emgFiles(j).name;
 		disp(['Processing ' emgPathName filesep dataFname])
-		emgData = emgSegmentRetrievev2(emgPathName,dataFname,refTags, 'channels',channels);
+		emgData = emgSegmentRetrievev2(emgPathName,dataFname,refTags,header,'channels',channels);
 		if emgData.condition == 1
-			cno_count = cno_count + 1;
 			emgDataCNO = [emgDataCNO emgData];
 		elseif emgData.condition == 0
-			ctrl_count = ctrl_count + 1;
 			emgDataCtrl = [emgDataCtrl emgData];
 		end
 	end
@@ -40,10 +42,13 @@ function [emgDataCNO, emgDataCtrl, header] = emgSegmentRetrieveFolder(emgPathNam
 	    p = inputParser;
 	    channels = {'bi','tri','trap','ecu'};
 	    addParameter(p,'channels',channels, @iscell);
+	    refFileHeader = false;
+	    addParameter(p,'refFileHeader',refFileHeader, @iscell);
 	    parse(p, input{:});
 	end
 
-	function [channels] = parseInput(p)
+	function [channels,refFileHeader] = parseInput(p)
 	    channels = p.channels;
+	    refFileHeader = p.refFileHeader;
 	end
 end
