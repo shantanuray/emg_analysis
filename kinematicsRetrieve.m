@@ -121,7 +121,7 @@ function [kmData, keypoints] = kinematicsRetrieve(kmFname,refTags,row,header,fps
                 end
                 for mt = 1:length(metafields)
                     totalSamp = length(kmData.(keypoints{kp}).(metafields{mt}));
-                    kmData.(keypoints{kp}).discrete.(metafields{mt}) = kmData.(keypoints{kp}).(metafields{mt})(1:min(totalSamp, pos2Samp));
+                    kmData.(keypoints{kp}).discrete.(metafields{mt}) = kmData.(keypoints{kp}).(metafields{mt})(pos1Samp:min(totalSamp, pos2Samp));
                 end
             else
                 kmData.(keypoints{kp}).discrete.tag = 'no-discrete';
