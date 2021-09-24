@@ -1,7 +1,7 @@
-function peakDataFlat = flattenEMGPeakAnalysis(peakData, animal, condition, varargin)
+function [peakDistTable, peakAmplTable] = flattenEMGPeakAnalysis(peakData, animal, conditions, varargin)
 	% peakData - see emgGetPeaksFolder
 	% animal = Name of the animal
-	% condition = 'CNO' or 'Control'
+	% condition = {'Control', 'CNO'} => (0,1)
 	% channels = {'bi','tri','trap','ecu'};
 	% segments = {'discrete', 'rhythmic'};
 	%
@@ -25,61 +25,63 @@ function peakDataFlat = flattenEMGPeakAnalysis(peakData, animal, condition, vara
 	[channels, segments] = parseInput(p.Results);
 
 	peakDataFlat = cell(length(peakData)*length(channels)*length(segments), 14);
-	for i = 1:length(peakData)
-		fileID = peakData(i).fileID;
-		tag = peakData(i).tag;
-		for j = 1:length(channels)
-			timePostCNO = peakData(i).(channels{j}).timePostCNO;
-			pullingBout = peakData(i).(channels{j}).pullingBout;
-			chan = channels(j);
-			for k = 1:length(segments)
-				counter = (i-1)*length(channels)*length(segments)+(j-1)*length(segments)+k;
+	for row = 1:length(peakData)
+		fileID = peakData(row).fileID;
+		tag = peakData(row).tag;
+		condition = conditions(peakData(row).condition+1);
+		timePostCNO = peakData(row).timePostCNO;
+		pos1 = peakData(row).pos1;
+		pos1 = peakData(row).pos2;
+		pos1 = peakData(row).pos3;
+		pullingBout = peakData(row).pullingBout;
+		trialTime = peakData(row).trialTime;
+		for chan = 1:length(channels)
+			for seg = 1:length(segments)
+				counter = (row-1)*length(channels)*length(segments)+(chan-1)*length(segments)+seg;
 				peakDataFlat{counter, 1} = animal;
 				peakDataFlat{counter, 2} = fileID;
 				peakDataFlat{counter, 3} = condition;
-				peakDataFlat{counter, 4} = tag;
-				peakDataFlat{counter, 5} = timePostCNO;
-				peakDataFlat{counter, 6} = pullingBout;
-				peakDataFlat{counter, 7} = chan;
-				peakDataFlat{counter, 8} = segments{k};
-				if isempty(strfind(peakData(i).(channels{j}).(segments{k}).tag, 'no-'))
-					fs = peakData(i).(channels{j}).samplingFrequency;
-					idx = peakData(i).(channels{j}).(segments{k}).peakLocation;
+				peakDataFlat{counter, 4} = trialTime;
+				peakDataFlat{counter, 5} = tag;
+				peakDataFlat{counter, 6} = timePostCNO;
+				peakDataFlat{counter, 7} = pullingBout;
+				peakDataFlat{counter, 8} = channels{chan};
+				peakDataFlat{counter, 9} = segments{seg};
+				if isempty(strfind(peakData(row).(channels{chan}).(segments{seg}).tag, 'no-'))
+					fs = peakData(row).(channels{chan}).samplingFrequency;
+					idx = peakData(row).(channels{chan}).(segments{seg}).peakLocation;
 					peak_dist = (idx(2:end) - idx(1:end-1))/fs;
-					peak_amp = peakData(i).(channels{j}).(segments{k}).peakAmplitude;
-					peakDataFlat{counter, 9} = peakData(i).(channels{j}).(segments{k}).averageFrequency;
-					peakDataFlat{counter, 10} = peakData(i).(channels{j}).(segments{k}).averagePeakDistance;
-					peakDataFlat{counter, 11} = peakData(i).(channels{j}).(segments{k}).peakDistanceStdDev;
-					peakDataFlat{counter, 12} = peakData(i).(channels{j}).(segments{k}).averagePeakAmplitude;
-					peakDataFlat{counter, 13} = peakData(i).(channels{j}).(segments{k}).peakAmplitudeStdDev;
-					peakDataFlat{counter, 14} = peak_dist';
-					peakDataFlat{counter, 15} = peak_amp';
+					peak_amp = peakData(row).(channels{chan}).(segments{seg}).peakAmplitude;
+					peakDataFlat{counter, 10} = peakData(row).(channels{chan}).(segments{seg}).averageFrequency;
+					peakDataFlat{counter, 11} = peakData(row).(channels{chan}).(segments{seg}).averagePeakDistance;
+					peakDataFlat{counter, 12} = peakData(row).(channels{chan}).(segments{seg}).peakDistanceStdDev;
+					peakDataFlat{counter, 13} = peakData(row).(channels{chan}).(segments{seg}).averagePeakAmplitude;
+					peakDataFlat{counter, 14} = peakData(row).(channels{chan}).(segments{seg}).peakAmplitudeStdDev;
+					peakDataFlat{counter, 15} = peak_dist';
+					peakDataFlat{counter, 16} = peak_amp';
 				end
 			end
 		end
 	end
 	
 	% Write to table
-	peakDistTable = cell2table(peakDataFlat(:, 1:14));
-	peakAmplTable = cell2table(peakDataFlat(:, [1:13, 15]));
+	peakDistTable = cell2table(peakDataFlat(:, 1:15));
+	peakAmplTable = cell2table(peakDataFlat(:, [1:14, 16]));
 	% Standardize column names
 	colnames_d = peakDistTable.Properties.VariableNames;
 	colnames_a = peakAmplTable.Properties.VariableNames;
-	actcolnames = {'Animal', 'FileID', 'Condition', 'Tag', 'Time Post CNO', 'Pulling Bout', 'Channel', 'Segment', 'Average Peak Frequency', 'Average Peak Distance', 'Std Dev Peak Distance', 'Average Peak Amplitude', 'Std Dev Peak Amplitude'};
-	for c=1:13
+	actcolnames = {'Animal', 'FileID', 'Condition', 'Trail Time(s)', 'Tag', 'Time Post CNO', 'Pulling Bout', 'Channel', 'Segment', 'Average Peak Frequency', 'Average Peak Distance', 'Std Dev Peak Distance', 'Average Peak Amplitude', 'Std Dev Peak Amplitude'};
+	for c=1:14
 		colnames_d{1,c} = actcolnames{c};
 		colnames_a{1,c} = actcolnames{c};
 	end
-	colnames_d{1,14} = 'peak_dist';
-	colnames_a{1,14} = 'peak_ampl';
+	colnames_d{1,15} = 'peak_dist';
+	colnames_a{1,15} = 'peak_ampl';
 	peakDistTable.Properties.VariableNames = colnames_d;
 	peakAmplTable.Properties.VariableNames = colnames_a;
-	% Write to file
-	writetable(peakDistTable, [animal, '_', condition, '_peak_dist.csv'])
-	writetable(peakAmplTable, [animal, '_', condition, '_peak_amp.csv'])
 
 	function c = empty2nan(c)
-	  c(cellfun(@isempty, c)) = {nan};
+		c(cellfun(@isempty, c)) = {NaN};
 	end
 
 	%% Read input

@@ -36,7 +36,6 @@ function [kmData, keypoints] = kinematicsRetrieve(kmFname,refTags,row,header,fps
     % Get reference file ID
     [~, fileID, ~] =  fileparts(refTags{1,fname_idx}{row,1});
     kmData.fileID = fileID;
-    kmData.fps = fps;
     kmData.tag = '';
     kmData.condition = refTags{1,cond_idx}(row,1);
     kmData.timePostCNO = refTags{1,timeCNO_idx}(row,1);
@@ -44,6 +43,8 @@ function [kmData, keypoints] = kinematicsRetrieve(kmFname,refTags,row,header,fps
     kmData.pos2 = refTags{1,pos2_idx}(row,1);
     kmData.pos3 = refTags{1,pos3_idx}(row,1);
     kmData.pullingBout = refTags{1,pullbout_idx}(row,1);
+    kmData.trialTime = NaN;
+    kmData.fps = fps;
 
     % Init segment time stamps
     % Time stamps may be slightly incorrect - round accordingly
@@ -110,6 +111,7 @@ function [kmData, keypoints] = kinematicsRetrieve(kmFname,refTags,row,header,fps
         end
     end
     if ~isempty(kmData.raw)
+        kmData.trialTime = length(kmData.raw)/fps;
         for kp = 1:length(keypoints)
             % pos1, pos2 and pos3 are wrt  the raw timeline
             % data start = 0 samp
@@ -121,7 +123,7 @@ function [kmData, keypoints] = kinematicsRetrieve(kmFname,refTags,row,header,fps
                 end
                 for mt = 1:length(metafields)
                     totalSamp = length(kmData.(keypoints{kp}).(metafields{mt}));
-                    kmData.(keypoints{kp}).discrete.(metafields{mt}) = kmData.(keypoints{kp}).(metafields{mt})(1:min(totalSamp, pos2Samp));
+                    kmData.(keypoints{kp}).discrete.(metafields{mt}) = kmData.(keypoints{kp}).(metafields{mt})(pos1Samp:min(totalSamp, pos2Samp));
                 end
             else
                 kmData.(keypoints{kp}).discrete.tag = 'no-discrete';
