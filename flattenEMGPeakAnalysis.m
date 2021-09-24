@@ -1,4 +1,4 @@
-function peakDataFlat = flattenEMGPeakAnalysis(peakData, animal, conditions, varargin)
+function [peakDistTable, peakAmplTable] = flattenEMGPeakAnalysis(peakData, animal, conditions, varargin)
 	% peakData - see emgGetPeaksFolder
 	% animal = Name of the animal
 	% condition = {'Control', 'CNO'} => (0,1)
@@ -66,7 +66,7 @@ function peakDataFlat = flattenEMGPeakAnalysis(peakData, animal, conditions, var
 	
 	% Write to table
 	peakDistTable = cell2table(peakDataFlat(:, 1:15));
-	peakAmplTable = cell2table(peakDataFlat(:, [1:15, 16]));
+	peakAmplTable = cell2table(peakDataFlat(:, [1:14, 16]));
 	% Standardize column names
 	colnames_d = peakDistTable.Properties.VariableNames;
 	colnames_a = peakAmplTable.Properties.VariableNames;
@@ -79,9 +79,6 @@ function peakDataFlat = flattenEMGPeakAnalysis(peakData, animal, conditions, var
 	colnames_a{1,15} = 'peak_ampl';
 	peakDistTable.Properties.VariableNames = colnames_d;
 	peakAmplTable.Properties.VariableNames = colnames_a;
-	% Write to file
-	writetable(peakDistTable, [animal, '_', condition, '_peak_dist.csv'])
-	writetable(peakAmplTable, [animal, '_', condition, '_peak_amp.csv'])
 
 	function c = empty2nan(c)
 		c(cellfun(@isempty, c)) = {NaN};
