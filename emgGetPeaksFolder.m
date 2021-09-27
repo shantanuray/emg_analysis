@@ -64,6 +64,15 @@ function [peakData, peakMetrics, peakDistances, peakAmplitudes] = emgGetPeaksFol
 		for chan = 1:length(channels)
 			% Do not save raw
 			peakData(row).(channels{chan}) = rmfield(peakData(row).(channels{chan}), 'raw');
+			% Change for CFL5 only
+			switch channels{chan}
+			case 'bi'
+				minPeakDistance = 200/1000;
+			case 'tri'
+				minPeakDistance = 180/1000;
+			otherwise
+				minPeakDistance = 200/1000;
+			end;
 			if ~isempty(emgData(row).(channels{chan}))
 				for seg = 1:length(segments)
 					if isfield(emgData(row).(channels{chan}), segments{seg})
