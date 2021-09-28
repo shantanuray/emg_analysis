@@ -31,7 +31,7 @@ save('PeakDistanceAnalysis_JFL2.mat', ...
 [CFL5_Ctrl_PeakMaster, CFL5_Ctrl_MetricsOnly, CFL5_Ctrl_DistancesOnly, CFL5_Ctrl_AmplitudesOnly] = emgGetPeaksFolder(CFL5_Ctrl);
 save('PeakDistanceAnalysis_CFL5.mat', ...
 	 'CFL5_CNO_PeakMaster', 'CFL5_CNO_MetricsOnly', 'CFL5_CNO_DistancesOnly', 'CFL5_CNO_AmplitudesOnly', ...
-	 'CFL5_Ctrl_PeakMaster', 'JFL5_Ctrl_MetricsOnly', 'CFL5_Ctrl_DistancesOnly', 'CFL5_Ctrl_AmplitudesOnly');
+	 'CFL5_Ctrl_PeakMaster', 'CFL5_Ctrl_MetricsOnly', 'CFL5_Ctrl_DistancesOnly', 'CFL5_Ctrl_AmplitudesOnly');
 
 [peakDistTable, peakAmplTable] = flattenEMGPeakAnalysis(CFL4_CNO_PeakMaster, 'CFL4', conditions);
 writetable(peakDistTable, 'CFL4_CNO_peak_dist.csv');
@@ -53,7 +53,6 @@ writetable(peakAmplTable, 'CFL5_CNO_peak_amp.csv');
 [peakDistTable, peakAmplTable] = flattenEMGPeakAnalysis(CFL5_Ctrl_PeakMaster, 'CFL5', conditions);
 writetable(peakDistTable, 'CFL5_Ctrl_peak_dist.csv');
 writetable(peakAmplTable, 'CFL5_Ctrl_peak_amp.csv');
-
 
 plotPeakDistHistogram('CFL4', {CFL4_Ctrl_peak_dist, CFL4_CNO_peak_dist}, 'rhythmic', 0:0.025:0.9);
 plotPeakDistHistogram('CFL5', {CFL5_Ctrl_peak_dist, CFL5_CNO_peak_dist}, 'rhythmic', 0:0.025:0.9);
