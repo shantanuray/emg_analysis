@@ -1,4 +1,4 @@
-function [peakData, peakMetrics, peakDistances] = emgGetPeaksFolder(emgData, varargin)
+function [peakData, peakMetrics, peakDistances, peakAmplitudes] = emgGetPeaksFolder(emgData, varargin)
     % peakData = emgGetPeaksFolder(emgData, channels, segments);
     % [peakData, peakMetrics, peakDistances] = emgGetPeaksFolder(emgData);
     % Run get_peaks on filtered EMG signal for entire folder
@@ -11,17 +11,37 @@ function [peakData, peakMetrics, peakDistances] = emgGetPeaksFolder(emgData, var
     % peakDistances - cell {# channels, # segments} with peak distances from all the files for (chan,seg)
     %
     % Parameters:
-    % channels - {'bi', 'tri', 'ecu', 'trap'}
+    % Parameters:
+    % channels - {'bi', 'tri', 'trap', 'ecu'}
     % segments - {'discrete', 'rhythmic'}
     % movingAverageWindow - for filtering: 100 ms (0.1)
-    % minPeakDistance - for find_peaks: 100ms (0.1)
-    % rmsPctCutoff - RMS cut off for min peak height: Default skip (NaN)
+    % minPeakDistance - for find_peaks: 150ms (0.15)
+    % rmsPctCutoff - RMS cut off for min peak height: Default 1
+    % filterType - 'iir' (lo - 30Hz, hi - 50Hz)
 
     p = readInput(varargin);
     [channels, segments, filterType, passbandFrequency, filterOrder, passbandRipple, movingAverageWindow, minPeakDistance, rmsPctCutoff] = parseInput(p.Results);
+
+    %% Init output
+
+    % peak metrics consist of [averageFrequency, averagePeakDistance, averagePeakAmplitude,
+    %						   peakDistanceStdDev, peakAmplitudeStdDev]
+    % 4-D matrix [length(emgData), length(channels), length(segments), # of metrics(5)]
     peakMetrics = NaN(length(emgData), length(channels), length(segments), 5);
+
+    % peakDistances/Amplitude consolidates all peak distance/ amplitude values from all pulls and all files
+    % segmented by channels (rows), segments (cols), i.e.
+    % 			discrete    			rhythmic
+    % bi  		[all peaks] 			[all peaks]
+    % tri 	    [all peaks] 			[all peaks]
+    % ...
     peakDistances = cell(length(channels), length(segments));
+    peakAmplitudes = cell(length(channels), length(segments));
+
+    % peakData is same as emgData but with peakmetrics, peakDistances, peakAmplitudes and sans raw EMG
     peakData = emgData;
+
+    % Get sampling frequency from first available data
     fs = NaN;
     while isnan(fs) | isempty(fs)
     	for row = 1:length(emgData)
@@ -42,6 +62,7 @@ function [peakData, peakMetrics, peakDistances] = emgGetPeaksFolder(emgData, var
 
 	for row = 1:length(emgData)
 		for chan = 1:length(channels)
+			% Do not save raw
 			peakData(row).(channels{chan}) = rmfield(peakData(row).(channels{chan}), 'raw');
 			if ~isempty(emgData(row).(channels{chan}))
 				for seg = 1:length(segments)
@@ -84,6 +105,7 @@ function [peakData, peakMetrics, peakDistances] = emgGetPeaksFolder(emgData, var
 								peakData(row).(channels{chan}).(segments{seg}).peakAmplitudeStdDev = pk_amp_std;
 								peakMetrics(row,chan,seg,:) = [pk_freq, pk_dist, pk_amp, pk_dist_std, pk_amp_std];
 								peakDistances{chan,seg} = [peakDistances{chan,seg};(idx(2:end)-idx(1:end-1))/fs];
+								peakAmplitudes{chan,seg} = [peakAmplitudes{chan,seg};pks];
 							end
 						end
 					end
