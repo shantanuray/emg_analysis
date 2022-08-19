@@ -27,7 +27,7 @@ function [emgDataCNO, emgDataCtrl, header] = emgSegmentRetrieveFolder(emgPathNam
 	for j = 1:length(emgFiles)
 		dataFname = emgFiles(j).name;
 		disp(['Processing ' emgPathName filesep dataFname])
-		emgData = emgSegmentRetrievev2(emgPathName,dataFname,refTags,header,'channels',channels);
+		emgData = emgSegmentRetrieve(emgPathName,dataFname,refTags,header,'channels',channels);
 		if emgData.condition == 1
 			emgDataCNO = [emgDataCNO emgData];
 		elseif emgData.condition == 0

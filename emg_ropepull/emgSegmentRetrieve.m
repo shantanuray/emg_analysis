@@ -1,6 +1,7 @@
-function emgData = emgSegmentRetrievev2(emgPathName,dataFname,refTags,header,varargin)
-    % emgData = emgSegmentRetrievev2(emgPathName,dataFname,refTags,
+function emgData = emgSegmentRetrieve(emgPathName,dataFname,refTags,header,varargin)
+    % emgData = emgSegmentRetrieve(emgPathName,dataFname,refTags,
     %            'channels',{'bi','tri','trap','ecu'});
+    % From setup before August 2022 - Ask Ayesha for more details
     % Steps:
     % - Read MAT file with EMG data
     % - Read CSV with segment information
