@@ -1,4 +1,4 @@
-function emgData = emgSegmentRetrieve(emgPathName,dataFname,refTags,varargin)
+function emgData = emgSegmentRetrieve_old(emgPathName,dataFname,refTags,varargin)
     % emgData = emgSegmentRetrieve(emgPathName,dataFname,refTags,
     %            'moving_average_window',100/1000,
     %            'channels',{'bi','tri','trap','ecu'},
