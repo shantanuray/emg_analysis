@@ -2,7 +2,7 @@ function [averageFrequency, averagePeakDistance, averagePeakAmplitude, peakDista
 
 averageFrequency = length(peakLocation)*fs/dataLength;
 peak_dist = peakLocation(2:end) - peakLocation(1:end-1);
-averagePeakDistance = mean(peak_dist, 1)/fs;
+averagePeakDistance = mean(peak_dist)/fs;
 peakDistanceStdDev = std(peak_dist)/fs;
 if isempty(averagePeakDistance)
 	averagePeakDistance = 0;
@@ -10,7 +10,7 @@ end
 if isempty(peakDistanceStdDev)
 	peakDistanceStdDev = 0;
 end
-averagePeakAmplitude = mean(peakAmplitude, 1);
+averagePeakAmplitude = mean(peakAmplitude);
 peakAmplitudeStdDev = std(peakAmplitude);
 if isempty(peakAmplitudeStdDev)
 	peakAmplitudeStdDev = 0;

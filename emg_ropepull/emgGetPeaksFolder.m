@@ -1,6 +1,7 @@
 function [peakData, peakMetrics, peakDistances, peakAmplitudes] = emgGetPeaksFolder(emgData, varargin)
     % peakData = emgGetPeaksFolder(emgData, channels, segments);
     % [peakData, peakMetrics, peakDistances] = emgGetPeaksFolder(emgData);
+    % [peakData, peakMetrics, peakDistances, peakAmplitudes] = emgGetPeaksFolder(emgData, 'channels', {'bi_R','tri_R','bi_L','tri_L'}, 'segments', {'data_raw', 'data_smooth'}, 'filterType', 'na');
     % Run get_peaks on filtered EMG signal for entire folder
     %			  for each channel, filtered and separated into segments
     % emgData	- EMG data with raw signal
@@ -20,7 +21,7 @@ function [peakData, peakMetrics, peakDistances, peakAmplitudes] = emgGetPeaksFol
     % filterType - 'iir' (lo - 30Hz, hi - 50Hz)
 
     p = readInput(varargin);
-    [channels, segments, filterType, passbandFrequency, filterOrder, passbandRipple, movingAverageWindow, minPeakDistance, rmsPctCutoff] = parseInput(p.Results);
+    [channels, segments, filterType, passbandFrequency, filterOrder, passbandRipple, movingAverageWindow, minPeakDistance, rmsPctCutoff, widthReference] = parseInput(p.Results);
 
     %% Init output
 
@@ -50,7 +51,7 @@ function [peakData, peakMetrics, peakDistances, peakAmplitudes] = emgGetPeaksFol
     		end
     	end
     end
-    if filterType=='iir'
+    if strcmpi(filterType,'iir')
     	loFilt = designfilt('lowpassiir','FilterOrder',filterOrder, ...
     	         			'PassbandFrequency',passbandFrequency(1), 'PassbandRipple',passbandRipple, ...
     	         			'SampleRate',fs);
@@ -63,7 +64,9 @@ function [peakData, peakMetrics, peakDistances, peakAmplitudes] = emgGetPeaksFol
 	for row = 1:length(emgData)
 		for chan = 1:length(channels)
 			% Do not save raw
-			peakData(row).(channels{chan}) = rmfield(peakData(row).(channels{chan}), 'raw');
+            if isfield(peakData(row).(channels{chan}), 'raw')
+                peakData(row).(channels{chan}) = rmfield(peakData(row).(channels{chan}), 'raw');
+            end
 			if ~isempty(emgData(row).(channels{chan}))
 				for seg = 1:length(segments)
 					if isfield(emgData(row).(channels{chan}), segments{seg})
@@ -74,17 +77,17 @@ function [peakData, peakMetrics, peakDistances, peakAmplitudes] = emgGetPeaksFol
 							peakData(row).(channels{chan}).(segments{seg}) = rmfield(peakData(row).(channels{chan}).(segments{seg}), 'raw');
 							if ~isempty(data)
 								% if IIR filter, high pass 50hz before rectification
-								if filterType=='iir'
+								if strcmpi(filterType,'iir')
 									data = filter(hiFilt,data);
 									peakData(row).(channels{chan}).(segments{seg}).HiPassBand = passbandFrequency(1);
 								end
 								% rectify bipolar emg signals
 								data = abs(data);
-								if filterType=='mva'
+								if strcmpi(filterType,'mva')
 									% Moving average filter
 									peakData(row).(channels{chan}).(segments{seg}).movingAverageWindow = movingAverageWindow;
 									data = movingAverage(data, movingAverageWindow, fs);
-								elseif filterType=='iir'
+								elseif strcmpi(filterType,'iir')
 									% if IIR filter, low pass 30hz after rectification
 									data = filter(loFilt,data);
 									peakData(row).(channels{chan}).(segments{seg}).HiPassBand = passbandFrequency(2);
@@ -93,9 +96,14 @@ function [peakData, peakMetrics, peakDistances, peakAmplitudes] = emgGetPeaksFol
 								% Get peaks
 								peakData(row).(channels{chan}).(segments{seg}).minPeakDistance = minPeakDistance;
 								peakData(row).(channels{chan}).(segments{seg}).rmsPctCutoff = rmsPctCutoff;
-								[pks, idx] = emgGetPeaks(data, fs, 'minPeakDistance', minPeakDistance, 'rmsPctCutoff', rmsPctCutoff);
+                                peakData(row).(channels{chan}).(segments{seg}).widthReference = widthReference;
+								[pks, idx, w] = emgGetPeaks(data, fs,...
+                                                         'minPeakDistance', minPeakDistance,...
+                                                         'rmsPctCutoff', rmsPctCutoff,...
+                                                         'widthReference', widthReference);
 								peakData(row).(channels{chan}).(segments{seg}).peakAmplitude = pks;
 								peakData(row).(channels{chan}).(segments{seg}).peakLocation = idx;
+                                peakData(row).(channels{chan}).(segments{seg}).peakWidth = w;
 								peakData(row).(channels{chan}).(segments{seg}).peakTime = idx/fs;
 								[pk_freq, pk_dist, pk_amp, pk_dist_std, pk_amp_std] = peakAnalysis(idx, pks, fs, L);
 								peakData(row).(channels{chan}).(segments{seg}).averageFrequency = pk_freq;
@@ -104,8 +112,8 @@ function [peakData, peakMetrics, peakDistances, peakAmplitudes] = emgGetPeaksFol
 								peakData(row).(channels{chan}).(segments{seg}).peakDistanceStdDev = pk_dist_std;
 								peakData(row).(channels{chan}).(segments{seg}).peakAmplitudeStdDev = pk_amp_std;
 								peakMetrics(row,chan,seg,:) = [pk_freq, pk_dist, pk_amp, pk_dist_std, pk_amp_std];
-								peakDistances{chan,seg} = [peakDistances{chan,seg};(idx(2:end)-idx(1:end-1))/fs];
-								peakAmplitudes{chan,seg} = [peakAmplitudes{chan,seg};pks];
+								peakDistances{chan,seg} = [peakDistances{chan,seg}, (idx(2:end)-idx(1:end-1))/fs];
+								peakAmplitudes{chan,seg} = [peakAmplitudes{chan,seg}, pks];
 							end
 						end
 					end
@@ -125,7 +133,7 @@ function [peakData, peakMetrics, peakDistances, peakAmplitudes] = emgGetPeaksFol
         channels = {'bi','tri','trap','ecu'};
         segments = {'discrete', 'rhythmic'};
         filterType = 'iir';
-        validFilters = {'mva','iir'};
+        validFilters = {'na','mva','iir'};
         checkFilter = @(x) any(validatestring(x,validFilters));
         passbandFrequency = [30, 50];
         filterOrder = 4;
@@ -133,6 +141,9 @@ function [peakData, peakMetrics, peakDistances, peakAmplitudes] = emgGetPeaksFol
         movingAverageWindow = 100/1000;
         minPeakDistance = 150/1000;
         rmsPctCutoff = 1;
+        validWidthReferenceTypes = {'halfprom','halfheight'}; % (see help findpeaks - WidthReference)
+        checkWidthReference = @(x) any(validatestring(x,validWidthReferenceTypes));
+        widthReference = 'halfprom';
         
         addParameter(p,'channels',channels, @iscell);
         addParameter(p,'segments',segments, @iscell);
@@ -143,10 +154,11 @@ function [peakData, peakMetrics, peakDistances, peakAmplitudes] = emgGetPeaksFol
         addParameter(p,'movingAverageWindow',movingAverageWindow, @isnumeric);
         addParameter(p,'minPeakDistance',minPeakDistance, @isnumeric);
         addParameter(p,'rmsPctCutoff',rmsPctCutoff, @isnumeric);
+        addParameter(p,'widthReference',widthReference, checkWidthReference);
         parse(p, input{:});
     end
 
-    function [channels, segments, filterType, passbandFrequency, filterOrder, passbandRipple, movingAverageWindow, minPeakDistance, rmsPctCutoff] = parseInput(p)
+    function [channels, segments, filterType, passbandFrequency, filterOrder, passbandRipple, movingAverageWindow, minPeakDistance, rmsPctCutoff, widthReference] = parseInput(p)
         channels = p.channels;
         segments = p.segments;
         filterType = p.filterType;
@@ -156,6 +168,7 @@ function [peakData, peakMetrics, peakDistances, peakAmplitudes] = emgGetPeaksFol
         movingAverageWindow = p.movingAverageWindow;
         minPeakDistance = p.minPeakDistance;
         rmsPctCutoff = p.rmsPctCutoff;
+        widthReference = p.widthReference;
     end
 
 end
