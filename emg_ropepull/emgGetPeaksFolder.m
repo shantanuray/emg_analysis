@@ -71,11 +71,10 @@ function [peakData, peakMetrics, peakDistances, peakAmplitudes] = emgGetPeaksFol
 				for seg = 1:length(segments)
 					if isfield(emgData(row).(channels{chan}), segments{seg})
 						if isfield(emgData(row).(channels{chan}).(segments{seg}), 'raw')
-							disp(sprintf('Get peaks for %s channel %s segment %s', emgData(row).fileID, channels{chan}, segments{seg}))
 							fs = emgData(row).(channels{chan}).samplingFrequency;
 							data = emgData(row).(channels{chan}).(segments{seg}).raw;
 							peakData(row).(channels{chan}).(segments{seg}) = rmfield(peakData(row).(channels{chan}).(segments{seg}), 'raw');
-							if ~isempty(data)
+							if ~(isempty(data)|isnan(data))
 								% if IIR filter, high pass 50hz before rectification
 								if strcmpi(filterType,'iir')
 									data = filter(hiFilt,data);
