@@ -53,15 +53,17 @@ function [peakDistTable, peakAmplTable] = flattenEMGPeakAnalysis(peakData, anima
 				if isempty(strfind(getFieldOrNaN(peakData(row).(channels{chan}).(segments{seg}), 'tag'), 'no-'))
 					fs = peakData(row).(channels{chan}).samplingFrequency;
 					idx = peakData(row).(channels{chan}).(segments{seg}).peakLocation;
-					peak_dist = diff(idx)/fs;
-					peak_amp = peakData(row).(channels{chan}).(segments{seg}).peakAmplitude;
-					peakDataFlat{counter, 10} = peakData(row).(channels{chan}).(segments{seg}).averageFrequency;
-					peakDataFlat{counter, 11} = peakData(row).(channels{chan}).(segments{seg}).averagePeakDistance;
-					peakDataFlat{counter, 12} = peakData(row).(channels{chan}).(segments{seg}).peakDistanceStdDev;
-					peakDataFlat{counter, 13} = peakData(row).(channels{chan}).(segments{seg}).averagePeakAmplitude;
-					peakDataFlat{counter, 14} = peakData(row).(channels{chan}).(segments{seg}).peakAmplitudeStdDev;
-					peakDataFlat{counter, 15} = flattenVector(peak_dist);
-					peakDataFlat{counter, 16} = flattenVector(peak_amp);
+					if length(idx) > 0
+						peak_dist = diff(idx)/fs;
+						peak_amp = peakData(row).(channels{chan}).(segments{seg}).peakAmplitude;
+						peakDataFlat{counter, 10} = peakData(row).(channels{chan}).(segments{seg}).averageFrequency;
+						peakDataFlat{counter, 11} = peakData(row).(channels{chan}).(segments{seg}).averagePeakDistance;
+						peakDataFlat{counter, 12} = peakData(row).(channels{chan}).(segments{seg}).peakDistanceStdDev;
+						peakDataFlat{counter, 13} = peakData(row).(channels{chan}).(segments{seg}).averagePeakAmplitude;
+						peakDataFlat{counter, 14} = peakData(row).(channels{chan}).(segments{seg}).peakAmplitudeStdDev;
+						peakDataFlat{counter, 15} = flattenVector(peak_dist);
+						peakDataFlat{counter, 16} = flattenVector(peak_amp);
+					end
 				end
 			end
 		end
