@@ -12,7 +12,7 @@ function run_RopePull_EMG_RetrievalConsolidated_PeakAnalysis(emgPathName, start_
 	segments = {'data_raw', 'data_smooth'};
 	filterType = 'na';
 	emg_fs = 10000;
-	minPeakDistance = 120/1000;
+	minPeakDistance = 200/1000;
 	widthReference = 'halfheight'; % See help findpeaks
 	fileDelim = '_'; % Get animal name from file
 	conditions = []; % Required for flatten peak analysis

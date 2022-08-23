@@ -49,7 +49,7 @@ function emgDataOut = emgSegmentRetrieve_ConsolidatedData(emgPathName,dataFname,
                 emgData.(channels{chan}).samplingFrequency =  fs;
                 emgData.(channels{chan}).offset =  NaN;
                 if length(emgConsolidated(row).(dataType{dt})(chan,:)) < end_pos
-                    emgData.(channels{chan}).(dataType{dt}).raw = nan
+                    emgData.(channels{chan}).(dataType{dt}).raw = nan;
                     emgData.error = sprintf('Data length than %s', end_pos);
                 else
                     emgData.(channels{chan}).(dataType{dt}).raw = emgConsolidated(row).(dataType{dt})(chan, start_pos:end_pos);
