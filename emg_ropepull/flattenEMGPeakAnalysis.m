@@ -50,6 +50,7 @@ function [peakDistTable, peakAmplTable] = flattenEMGPeakAnalysis(peakData, anima
 				peakDataFlat{counter, 7} = pullingBout;
 				peakDataFlat{counter, 8} = channels{chan};
 				peakDataFlat{counter, 9} = segments{seg};
+				
 				if isempty(strfind(getFieldOrNaN(peakData(row).(channels{chan}).(segments{seg}), 'tag'), 'no-'))
 					fs = peakData(row).(channels{chan}).samplingFrequency;
 					idx = getFieldOrNan(peakData(row).(channels{chan}).(segments{seg}), 'peakLocation');
