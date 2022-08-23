@@ -38,6 +38,7 @@ function emgDataOut = emgSegmentRetrieve_ConsolidatedData(emgPathName,dataFname,
         emgData.fileID = sprintf('%s_%d',fileID, row);
         emgData.tag = NaN; % Backward compatibility
         emgData.condition = NaN; % Backward compatibility
+        emgData.error = NaN;
         for dt = 1:length(dataType)
             if size(emgConsolidated(row).(dataType{dt}), 1) < length(channels)
                 disp(['Error: Check data format for ' fileID '. Expected ' length(channels) ' - Got ' size(emgConsolidated.(dataType{dt}), 1)]);
@@ -47,7 +48,12 @@ function emgDataOut = emgSegmentRetrieve_ConsolidatedData(emgPathName,dataFname,
                 emgData.(channels{chan}).fileID =  sprintf('%s_%d',fileID, row);
                 emgData.(channels{chan}).samplingFrequency =  fs;
                 emgData.(channels{chan}).offset =  NaN;
-                emgData.(channels{chan}).(dataType{dt}).raw = emgConsolidated(row).(dataType{dt})(chan, start_pos:end_pos);
+                if length(emgConsolidated(row).(dataType{dt})(chan,:)) < end_pos
+                    emgData.(channels{chan}).(dataType{dt}).raw = nan
+                    emgData.error = sprintf('Data length than %s', end_pos);
+                else
+                    emgData.(channels{chan}).(dataType{dt}).raw = emgConsolidated(row).(dataType{dt})(chan, start_pos:end_pos);
+                end
             end
         end
         emgDataOut = [emgDataOut emgData];

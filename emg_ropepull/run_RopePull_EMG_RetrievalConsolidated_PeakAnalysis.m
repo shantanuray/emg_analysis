@@ -20,7 +20,7 @@ function run_RopePull_EMG_RetrievalConsolidated_PeakAnalysis(emgPathName, start_
 	emgFiles = dir(fullfile(emgPathName, '*_processed.mat'));
 
 	for emg_file_indx = 1:length(emgFiles)
-		dataFname = emgFiles.name;
+		dataFname = emgFiles(emg_file_indx).name;
 		[~, fileID, ~] =  fileparts(dataFname);
 		disp(sprintf('Retrieving data from %s', fullfile(emgPathName,dataFname)));
 		emgData = emgSegmentRetrieve_ConsolidatedData(emgPathName,dataFname, emg_fs);
