@@ -34,6 +34,6 @@ function run_RopePull_EMG_RetrievalConsolidated_PeakAnalysis(emgPathName, start_
 		outFile = fullfile(emgPathName, [fileID, '_analysis.mat']);
 		disp(sprintf('Saving analysis to %s', outFile));
 		save(outFile, 'emgData', 'peakData', 'peakMetrics', 'peakDistances', 'peakAmplitudes');
-		writePeakAnalysisToFile(peakData, fileID, channels, segments, emgPathName);
+		writePeakAnalysisToFile(peakData, fileID, fileDelim, channels, segments, emgPathName);
 	end
 end
