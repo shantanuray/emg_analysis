@@ -53,7 +53,7 @@ function [peakDistTable, peakAmplTable] = flattenEMGPeakAnalysis(peakData, anima
 				
 				if isempty(strfind(getFieldOrNaN(peakData(row).(channels{chan}).(segments{seg}), 'tag'), 'no-'))
 					fs = peakData(row).(channels{chan}).samplingFrequency;
-					idx = getFieldOrNan(peakData(row).(channels{chan}).(segments{seg}), 'peakLocation');
+					idx = getFieldOrNaN(peakData(row).(channels{chan}).(segments{seg}), 'peakLocation');
 					if (length(idx) > 0) & (~isnan(idx))
 						peak_dist = diff(idx)/fs;
 						peak_amp = peakData(row).(channels{chan}).(segments{seg}).peakAmplitude;
