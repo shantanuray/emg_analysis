@@ -10,10 +10,14 @@ function run_RopePull_EMG_RetrievalConsolidated_PeakAnalysis(emgPathName, start_
 	end
 	channels = {'bi_R','tri_R','bi_L','tri_L'};
 	segments = {'data_raw', 'data_smooth'};
-	filterType = 'na';
+	filterType = 'iir';
 	emg_fs = 10000;
 	minPeakDistance = 200/1000;
 	widthReference = 'halfheight'; % See help findpeaks
+	passbandFrequency = [1000, 300];
+	loFrequency = 50;
+	filterOrder = 4;
+	passbandRipple = 0.2;
 	fileDelim = '_'; % Get animal name from file
 	conditions = []; % Required for flatten peak analysis
 
@@ -29,6 +33,10 @@ function run_RopePull_EMG_RetrievalConsolidated_PeakAnalysis(emgPathName, start_
 																				   'channels', channels,...
 																				   'segments', segments,...
 																				   'filterType', filterType,...
+																				   'passbandFrequency', passbandFrequency,...
+																				   'loFrequency', loFrequency,...
+																				   'filterOrder', filterOrder,...
+																				   'passbandRipple', passbandRipple,...
 																				   'minPeakDistance', minPeakDistance,...
 																				   'widthReference', widthReference);
 		outFile = fullfile(emgPathName, [fileID, '_analysis.mat']);
