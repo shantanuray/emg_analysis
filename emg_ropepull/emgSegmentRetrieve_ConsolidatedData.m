@@ -18,7 +18,7 @@ function emgDataOut = emgSegmentRetrieve_ConsolidatedData(emgPathName,dataFname,
     % - Segment data (input by user)
     % - Store data in structure
     p = readInput(varargin);
-    [channels, dataType, start_pos, end_pos] = parseInput(p.Results);
+    [channels, dataType, start_pos, end_pos, emgDataLabel] = parseInput(p.Results);
     emgDataOut = [];
 
     % Read consolidated EMG file
@@ -49,10 +49,10 @@ function emgDataOut = emgSegmentRetrieve_ConsolidatedData(emgPathName,dataFname,
                 emgData.(channels{chan}).samplingFrequency =  fs;
                 emgData.(channels{chan}).offset =  NaN;
                 if length(emgConsolidated(row).(dataType{dt})(chan,:)) < end_pos
-                    emgData.(channels{chan}).(dataType{dt}).raw = nan;
+                    emgData.(channels{chan}).(dataType{dt}).(emgDataLabel) = nan;
                     emgData.error = sprintf('Data length than %s', end_pos);
                 else
-                    emgData.(channels{chan}).(dataType{dt}).raw = emgConsolidated(row).(dataType{dt})(chan, start_pos:end_pos);
+                    emgData.(channels{chan}).(dataType{dt}).(emgDataLabel) = emgConsolidated(row).(dataType{dt})(chan, start_pos:end_pos);
                 end
             end
         end
@@ -66,11 +66,13 @@ function emgDataOut = emgSegmentRetrieve_ConsolidatedData(emgPathName,dataFname,
         end_pos = 55000;
         channels = {'bi_R','tri_R','bi_L','tri_L'};
         dataType = {'data_raw', 'data_smooth'};
+        emgDataLabel = 'data';
         validScalarPosNum = @(x) isnumeric(x) && isscalar(x) && (x > 0);
         addParameter(p,'channels',channels, @iscell);
         addParameter(p,'dataType',dataType, @iscell);
         addParameter(p,'start_pos',start_pos, validScalarPosNum);
         addParameter(p,'end_pos',end_pos, validScalarPosNum);
+        addParameter(p,'emgDataLabel',emgDataLabel, @ischar);
         parse(p, input{:});
     end
 
@@ -79,5 +81,6 @@ function emgDataOut = emgSegmentRetrieve_ConsolidatedData(emgPathName,dataFname,
         dataType = p.dataType;
         start_pos = p.start_pos;
         end_pos = p.end_pos;
+        emgDataLabel = p.emgDataLabel;
     end
 end

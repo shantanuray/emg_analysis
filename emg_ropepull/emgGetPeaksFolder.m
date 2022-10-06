@@ -19,9 +19,10 @@ function [peakData, peakMetrics, peakDistances, peakAmplitudes] = emgGetPeaksFol
     % minPeakDistance - for find_peaks: 150ms (0.15)
     % rmsPctCutoff - RMS cut off for min peak height: Default 1
     % filterType - 'iir' (lo - 30Hz, hi - 50Hz)
+    % emgDataLabel - 'raw' or 'data'
 
     p = readInput(varargin);
-    [channels, segments, filterConfig, minPeakDistance, rmsPctCutoff, widthReference] = parseInput(p.Results);
+    [channels, segments, filterConfig, minPeakDistance, rmsPctCutoff, widthReference, emgDataLabel] = parseInput(p.Results);
 
     %% Init output
 
@@ -67,16 +68,16 @@ function [peakData, peakMetrics, peakDistances, peakAmplitudes] = emgGetPeaksFol
 	for row = 1:length(emgData)
 		for chan = 1:length(channels)
 			% Do not save raw
-            if isfield(peakData(row).(channels{chan}), 'raw')
-                peakData(row).(channels{chan}) = rmfield(peakData(row).(channels{chan}), 'raw');
+            if isfield(peakData(row).(channels{chan}), emgDataLabel)
+                peakData(row).(channels{chan}) = rmfield(peakData(row).(channels{chan}), emgDataLabel);
             end
 			if ~isempty(emgData(row).(channels{chan}))
 				for seg = 1:length(segments)
 					if isfield(emgData(row).(channels{chan}), segments{seg})
-						if isfield(emgData(row).(channels{chan}).(segments{seg}), 'raw')
+						if isfield(emgData(row).(channels{chan}).(segments{seg}), emgDataLabel)
 							fs = emgData(row).(channels{chan}).samplingFrequency;
 							data = emgData(row).(channels{chan}).(segments{seg}).raw;
-							peakData(row).(channels{chan}).(segments{seg}) = rmfield(peakData(row).(channels{chan}).(segments{seg}), 'raw');
+							peakData(row).(channels{chan}).(segments{seg}) = rmfield(peakData(row).(channels{chan}).(segments{seg}), emgDataLabel);
 							segmentName = segments{seg};
                             if ~(isempty(data)|isnan(data))
                                 % Save original data in original segment name
@@ -147,6 +148,7 @@ function [peakData, peakMetrics, peakDistances, peakAmplitudes] = emgGetPeaksFol
         validWidthReferenceTypes = {'halfprom','halfheight'}; % (see help findpeaks - WidthReference)
         checkWidthReference = @(x) any(validatestring(x,validWidthReferenceTypes));
         widthReference = 'halfprom';
+        emgDataLabel = 'data';
         
         addParameter(p,'channels',channels, @iscell);
         addParameter(p,'segments',segments, @iscell);
@@ -154,6 +156,7 @@ function [peakData, peakMetrics, peakDistances, peakAmplitudes] = emgGetPeaksFol
         addParameter(p,'minPeakDistance',minPeakDistance, @isnumeric);
         addParameter(p,'rmsPctCutoff',rmsPctCutoff, @isnumeric);
         addParameter(p,'widthReference',widthReference, checkWidthReference);
+        addParameter(p,'emgDataLabel',emgDataLabel, @ischar);
         parse(p, input{:});
     end
 
@@ -164,6 +167,7 @@ function [peakData, peakMetrics, peakDistances, peakAmplitudes] = emgGetPeaksFol
         minPeakDistance = p.minPeakDistance;
         rmsPctCutoff = p.rmsPctCutoff;
         widthReference = p.widthReference;
+        emgDataLabel = p.emgDataLabel;
     end
 
 end

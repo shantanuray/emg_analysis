@@ -8,7 +8,7 @@ function emgData = emgSegmentRetrieve(emgPathName,dataFname,refTags,header,varar
     % - Segment data
     % - Store data in structure 
     p = readInput(varargin);
-    [channels] = parseInput(p.Results);
+    [channels, emgDataLabel] = parseInput(p.Results);
 
     % Get location of data from column labels
     fname_idx = find(~cellfun(@isempty, strfind(header, 'file name')));
@@ -44,7 +44,7 @@ function emgData = emgSegmentRetrieve(emgPathName,dataFname,refTags,header,varar
         emgData.(channels{chan}).fileID =  fileID;
         emgData.(channels{chan}).samplingFrequency =  fs;
         emgData.(channels{chan}).offset =  emgRaw.([fileID1, '_', channels{chan}]).offset;
-        emgData.(channels{chan}).raw =  emgRaw.([fileID1, '_', channels{chan}]).values;
+        emgData.(channels{chan}).(emgDataLabel) =  emgRaw.([fileID1, '_', channels{chan}]).values;
     end
 
     % Compare to reference CFL tag file
@@ -62,7 +62,7 @@ function emgData = emgSegmentRetrieve(emgPathName,dataFname,refTags,header,varar
         emgData.pos2 = refTags{1,pos2_idx}(idx,1);
         emgData.pos3 = refTags{1,pos3_idx}(idx,1);
         emgData.pullingBout = refTags{1,pullbout_idx}(idx,1);
-        emgData.trialTime = length(emgData.(channels{1}).raw)*emgRaw.([fileID1, '_', channels{1}]).interval;
+        emgData.trialTime = length(emgData.(channels{1}).(emgDataLabel))*emgRaw.([fileID1, '_', channels{1}]).interval;
 
         % Time stamps may be slightly incorrect - round accordingly
         % & pos = 0 -> samp = 1
@@ -92,7 +92,7 @@ function emgData = emgSegmentRetrieve(emgPathName,dataFname,refTags,header,varar
             fs =  1/emgRaw.([fileID1, '_', channels{chan}]).interval;
 
             % emgData.pos1, emgData.pos2 and emgData.pos3 are wrt to the raw timeline
-            totalSamp = length(emgData.(channels{chan}).raw);
+            totalSamp = length(emgData.(channels{chan}).(emgDataLabel));
             emgData.(channels{chan}).trialTime = totalSamp*emgRaw.([fileID1, '_', channels{chan}]).interval;
             % the emg data start = 0
             if (~(isnan(pos1Samp) | isnan(pos2Samp))) & (pos2Samp>pos1Samp)
@@ -101,10 +101,10 @@ function emgData = emgSegmentRetrieve(emgPathName,dataFname,refTags,header,varar
                 else
                     emgData.(channels{chan}).discrete.tag = 'partial-discrete';
                 end
-                emgData.(channels{chan}).discrete.raw = emgData.(channels{chan}).raw(pos1Samp:min(totalSamp, pos2Samp));
+                emgData.(channels{chan}).discrete.(emgDataLabel) = emgData.(channels{chan}).(emgDataLabel)(pos1Samp:min(totalSamp, pos2Samp));
             else
                 emgData.(channels{chan}).discrete.tag = 'no-discrete';
-                emgData.(channels{chan}).discrete.raw = [];
+                emgData.(channels{chan}).discrete.(emgDataLabel) = [];
             end
             if (~(isnan(pos2Samp) | isnan(pos3Samp))) & (pos3Samp>pos2Samp)
                 if emgData.pos2 > 0
@@ -112,10 +112,10 @@ function emgData = emgSegmentRetrieve(emgPathName,dataFname,refTags,header,varar
                 else
                     emgData.(channels{chan}).rhythmic.tag = 'partial-rhythmic';
                 end
-                emgData.(channels{chan}).rhythmic.raw = emgData.(channels{chan}).raw(pos2Samp:min(totalSamp, pos3Samp));
+                emgData.(channels{chan}).rhythmic.(emgDataLabel) = emgData.(channels{chan}).(emgDataLabel)(pos2Samp:min(totalSamp, pos3Samp));
             else
                 emgData.(channels{chan}).rhythmic.tag = 'no-rhythmic';
-                emgData.(channels{chan}).rhythmic.raw = [];
+                emgData.(channels{chan}).rhythmic.(emgDataLabel) = [];
             end
         end % for channel
     end % if file match
@@ -125,11 +125,14 @@ function emgData = emgSegmentRetrieve(emgPathName,dataFname,refTags,header,varar
         %   - channels              Default - {'bi','tri','trap','ecu'}
         p = inputParser;
         channels = {'bi','tri','trap','ecu'};
+        emgDataLabel = 'data';
         addParameter(p,'channels',channels, @iscell);
+        addParameter(p,'emgDataLabel',emgDataLabel, @ischar);
         parse(p, input{:});
     end
 
     function [channels] = parseInput(p)
         channels = p.channels;
+        emgDataLabel = p.emgDataLabel;
     end
 end
