@@ -18,6 +18,7 @@ function run_RopePull_EMG_RetrievalConsolidated_PeakAnalysis(emgPathName, start_
 	'filterOrder', 4,...
 	'passbandRipple', 0.2);
 	emgDataLabel = 'data';
+	alignWithKinematic = true; 
 	% filterConfig = struct('filterType', 'na');
 	
 	emg_fs = 10000;
@@ -27,6 +28,7 @@ function run_RopePull_EMG_RetrievalConsolidated_PeakAnalysis(emgPathName, start_
 	conditions = []; % Required for flatten peak analysis
 
 	emgFiles = dir(fullfile(emgPathName, '*_processed.mat'));
+	encoderFiles = dir(fullfile(emgPathName, 'CFL*CoolTerm*.csv'));
 
 	for emg_file_indx = 1:length(emgFiles)
 		dataFname = emgFiles(emg_file_indx).name;
@@ -35,6 +37,13 @@ function run_RopePull_EMG_RetrievalConsolidated_PeakAnalysis(emgPathName, start_
 		emgData = emgSegmentRetrieve_ConsolidatedData(emgPathName,dataFname, emg_fs,
 			'start_pos', start_pos,...
 			'end_pos', end_pos);
+		if alignWithKinematic
+			% TODO: Test with actual data
+			disp(sprintf('Aligning with kinematic data %s', fullfile(emgPathName,encoderFiles)));
+			trialMetadata = parseEncoderEMGKinematic(fullfile(emgPathName,encoderFiles));
+			emgDataAligned = emgAligntoKinematicRecording(emgData, trialMetadata);
+		end
+		emgData = emgDataAligned;
 		disp('Running peak analysis');
 		[peakData, peakMetrics, peakDistances, peakAmplitudes] = emgGetPeaksFolder(emgData,...
 																				   'channels', channels,...
