@@ -76,7 +76,7 @@ function [peakData, peakMetrics, peakDistances, peakAmplitudes] = emgGetPeaksFol
 					if isfield(emgData(row).(channels{chan}), segments{seg})
 						if isfield(emgData(row).(channels{chan}).(segments{seg}), emgDataLabel)
 							fs = emgData(row).(channels{chan}).samplingFrequency;
-							data = emgData(row).(channels{chan}).(segments{seg}).raw;
+							data = emgData(row).(channels{chan}).(segments{seg}).(emgDataLabel);
 							peakData(row).(channels{chan}).(segments{seg}) = rmfield(peakData(row).(channels{chan}).(segments{seg}), emgDataLabel);
 							segmentName = segments{seg};
                             if ~(isempty(data)|isnan(data))
