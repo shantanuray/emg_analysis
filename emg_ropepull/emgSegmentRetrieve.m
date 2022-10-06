@@ -131,7 +131,7 @@ function emgData = emgSegmentRetrieve(emgPathName,dataFname,refTags,header,varar
         parse(p, input{:});
     end
 
-    function [channels] = parseInput(p)
+    function [channels,emgDataLabel] = parseInput(p)
         channels = p.channels;
         emgDataLabel = p.emgDataLabel;
     end

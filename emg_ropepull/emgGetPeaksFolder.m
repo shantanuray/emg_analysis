@@ -160,7 +160,7 @@ function [peakData, peakMetrics, peakDistances, peakAmplitudes] = emgGetPeaksFol
         parse(p, input{:});
     end
 
-    function [channels, segments, filterConfig, minPeakDistance, rmsPctCutoff, widthReference] = parseInput(p)
+    function [channels, segments, filterConfig, minPeakDistance, rmsPctCutoff, widthReference, emgDataLabel] = parseInput(p)
         channels = p.channels;
         segments = p.segments;
         filterConfig = p.filterConfig;

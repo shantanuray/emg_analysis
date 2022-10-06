@@ -76,7 +76,7 @@ function emgDataOut = emgSegmentRetrieve_ConsolidatedData(emgPathName,dataFname,
         parse(p, input{:});
     end
 
-    function [channels,dataType,start_pos,end_pos] = parseInput(p)
+    function [channels,dataType,start_pos,end_pos, emgDataLabel] = parseInput(p)
         channels = p.channels;
         dataType = p.dataType;
         start_pos = p.start_pos;
